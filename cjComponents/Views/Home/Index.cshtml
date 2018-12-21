@@ -1,31 +1,269 @@
 ﻿@{
-    ViewBag.Title = "Home Page";
+    string controllerName = this.ViewContext.RouteData.Values["controller"].ToString();
+    string actionName = this.ViewContext.RouteData.Values["action"].ToString();
+    ViewBag.Title = "Home";
+}
+<style>
+    .material-icons {
+        vertical-align: middle;
+    }
+</style>
+<div class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-content">
+                        <h4 class="card-title">@ViewBag.Title</h4>
+                        <div class="toolbar">
+                            <!--        Here you can write extra buttons/actions for the toolbar              -->
+                        </div>
+
+                        <div id="hbcGridView"></div>
+                        <div id="hbcDetailGrid"></div>
+                        <br />
+                        <a href="javascript:void(0)" onclick="addItem()" class="btn btn-xs btn-info"> <i class="material-icons">add_circle_outline</i> Add</a>
+                        <br />
+                        <div id="hbcCardView"></div>
+                    </div>
+                    <!-- end content-->
+                </div>
+                <!--  end card  -->
+            </div>
+            <!-- end col-md-12 -->
+        </div>
+        <a href="/@(controllerName)/Edit?gid=@(Guid.Empty)" class="btn btn-info"> <i class="material-icons">add_circle_outline</i> New Record</a>
+        <!-- end row -->
+    </div>
+</div>
+
+<link href="~/Scripts/calibre/DataComps/cView-2.0.css" rel="stylesheet" />
+
+<script id="cardTemplate" type="x-handlebars-template">
+    <div style="padding:5px;">
+        <div class="row">
+            <div class="c-grid-cell col-md-2">Name</div>
+            <div class="c-grid-cell col-md-10">{{Name}}</div>
+        </div>
+        <div class="row">
+            <div class="c-grid-cell col-md-2">Price</div>
+            <div class="c-grid-cell col-md-10">{{Price}}</div>
+        </div>
+        <div class="row">
+            <div class="c-grid-cell col-md-2">Quantity</div>
+            <div class="c-grid-cell col-md-10">{{Quantity}}</div>
+        </div>
+        <div class="row">
+            <div class="c-grid-cell col-md-2">Discount</div>
+            <div class="c-grid-cell col-md-10">{{Discount}}</div>
+        </div>
+        <div class="row">
+            <div class="c-grid-cell col-md-2">Total</div>
+            <div class="c-grid-cell col-md-10">{{Total}}</div>
+        </div>
+        <div class="row">
+            <div class="c-grid-cell col-md-12">
+                <a href="/(controllerName)/Edit?gid={{OrderLineID}}" class="btn btn-xs btn-info"> <i class="material-icons">description</i> Edit</a>
+                <a href="/CandidateProcess/Index?gid={{OrderLineID}}" class="btn btn-xs btn-default"> <i class="material-icons">assignment</i> Tasks</a>
+                <a href="/(controllerName)/CVs?gid={{OrderLineID}}" class="btn btn-xs btn-primary"> <i class="material-icons">backup</i> Docs</a>
+            </div>
+
+        </div>
+    </div>
+</script>
+@section scripts
+{
+
+    @*Script includes*@
+
+    <script src="~/Scripts/handlebars.min-v4.0.12.js"></script>
+
+    <script src="~/Scripts/calibre/DataComps/cUtils-2.0.js"></script>
+    <script src="~/Scripts/calibre/DataComps/cDataAdaptor-2.0.js"></script>
+
+    <script src="~/Scripts/calibre/DataComps/cView-2.0.js"></script>
+    <script src="~/Scripts/calibre/DataComps/cForm.js"></script>
+    <!--
+    <script src="~/Scripts/calibre/DataComps/cFormControls-2.0.js"></script>
+        -->
+    @*End Script includes*@
+
+
+    <script>
+        "use strict";
+        var cols = [
+            { name: "Name", title: "Name", width: 4 },
+            { name: "Price", title: "Price", width: 1 },
+            { name: "Quantity", title: "Qty", width: 1 },
+            { name: "Discount", title: "Disc", width: 1 },
+            { name: "Total", title: "Total", width: 1 },
+            {
+                title: "Actions",
+                sortable: false,
+                width: 4,
+                "render": function (sender, row, cIndex, index) {
+                    var gid = row.OrderLineID;
+                    return '<a href="/(controllerName)/Edit?gid=' + gid + '" class="btn btn-xs btn-info" > <i class="material-icons">description</i> Edit</a>' +
+                        '<a href="/CandidateProcess/Index?gid=' + gid + '" class="btn btn-xs btn-default" > <i class="material-icons">assignment</i> Tasks</a>' +
+                        '<a href="/(controllerName)/CVs?gid=' + gid + '" class="btn btn-xs btn-primary" > <i class="material-icons">backup</i> Docs</a>';
+                }
+            }
+        ];
+
+        //object array format
+
+        var data2 = [
+            { "OrderLineID": 1, "Name": "Pineapple", "Price": 1.50, "Quantity": 4 },
+            { "OrderLineID": 2, "Name": "Fresh Spring Onions", "Price": 1.10, "Quantity": 40 },
+            { "OrderLineID": 3, "Name": "Oranges", "Price": 0.20, "Quantity": 8 },
+            { "OrderLineID": 4, "Name": "Apples", "Price": 1.50, "Quantity": 5 },
+            { "OrderLineID": 5, "Name": "Raspberries", "Price": 1.50, "Quantity": 20 },
+            { "OrderLineID": 6, "Name": "Blueberries", "Price": 1.50, "Quantity": 20 },
+            { "OrderLineID": 7, "Name": "Pairs", "Price": 1.50, "Quantity": 8 },
+            { "OrderLineID": 8, "Name": "Melons", "Price": 1.50, "Quantity": 2 },
+            { "OrderLineID": 9, "Name": "Potatoes", "Price": 1.50, "Quantity": 6 },
+            { "OrderLineID": 10, "Name": "Sweet Potatoes", "Price": 1.50, "Quantity": 3 },
+            { "OrderLineID": 11, "Name": "Cabbages", "Price": 1.50, "Quantity": 1 },
+            { "OrderLineID": 12, "Name": "Lettuce", "Price": 1.50, "Quantity": 1 },
+            { "OrderLineID": 13, "Name": "Onions", "Price": 1.50, "Quantity": 25 },
+            { "OrderLineID": 14, "Name": "Carrots", "Price": 1.50, "Quantity": 30 },
+            { "OrderLineID": 15, "Name": "Broccoli", "Price": 1.50, "Quantity": 1 },
+            { "OrderLineID": 16, "Name": "Cauliflower", "Price": 1.50, "Quantity": 1 },
+            { "OrderLineID": 17, "Name": "Peas", "Price": 1.50, "Quantity": 1 },
+            { "OrderLineID": 18, "Name": "Sweetcorn", "Price": 1.50, "Quantity": 2 },
+            { "OrderLineID": 19, "Name": "Gooseberries", "Price": 1.50, "Quantity": 20 },
+            { "OrderLineID": 20, "Name": "Spring Onions", "Price": 1.50, "Quantity": 9 },
+            { "OrderLineID": 21, "Name": "Beetroot", "Price": 0.30, "Quantity": 3 },
+            { "OrderLineID": 22, "Name": "Avocado", "Price": 2.30, "Quantity": 1 }];
+
+        //for editing
+        //var statesList = @Html.Raw(ViewBag.statesJson);
+        var cols2 = [
+            {
+                name: "Name", title: "Name", width: 3,
+                ctl: new cTextControl({ name: "FirstName", required: true, class: 'form-control', onblur: 'onChange(this)' }),
+                "render": function (sender, row, cIndex, rIndex) {
+                    var attribs = {"data-index" : rIndex, "data-name" : 'Name'}
+                    return this.ctl.BuildHtml(row.Name, rIndex, attribs,'Details');
+                    //var gid = row.OrderLineID;
+                    //return '<input class="form-control" name="name[' + rIndex + ']" value="' + row.Name + '"></input>';
+                }
+
+            },
+            {
+                name: "Price", title: "Price", width: 1,
+                ctl: new cTextControl({ name: "Price", dataType: 'decimal', required: true, class: 'form-control', onblur: 'onChange(this)'}),
+                "render": function (sender, row, cIndex, rIndex) {
+                    var attribs = { "data-index": rIndex, "data-name": 'Price' }
+                    return this.ctl.BuildHtml(row.Price,rIndex,attribs, 'Details');
+                }
+            },
+            {
+                name: "Quantity", title: "Qty", width: 1
+                , ctl: new cTextControl({ name: "Price", dataType: 'decimal', required: true, class: 'form-control', onblur: 'onChange(this)' }),
+                "render": function (sender, row, cIndex, rIndex) {
+                    var attribs = { "data-index": rIndex, "data-name": 'Quantity' }
+                    return this.ctl.BuildHtml(row.Quantity,rIndex, attribs,'Details');
+                }
+
+            },
+            {
+                name: "Discount"
+                , title: "State"
+                , width: 2
+                , ctl: new cSelectControl({ required: true, EmptyOption: '', class: 'form-control', onChange: 'onChange(this)', url : "" /*,options: statesList*/})
+                ,render : function (sender, row, cIndex, rIndex) {
+                    //return row.Discount == null ? '' : row.Discount;
+                    var attribs = { "data-index": rIndex, "data-name": 'Discount' }
+                    return this.ctl.BuildHtml(row.Discount, rIndex, attribs, 'Details');
+                }
+            },
+            {
+                name: "Total", title: "Total", width: 1,
+                "render": function (sender, row, cIndex, rIndex) {
+                   // row.Discount = row.Price * row.Quantity;
+                    return row.Price * row.Quantity;
+                }
+            },
+            {
+                title: "Actions",
+                sortable: false,
+                width: 4,
+                "render": function (sender, row, cIndex, rIndex) {
+                    //var gid = row.OrderLineID;
+                    return '<a href="javascript:void(0)" onclick="addItem(' + rIndex + ')" class="btn btn-xs btn-info" > <i class="material-icons">description</i> Add</a>' +
+                        '<a href="javascript:void(0)" onclick="deleteItem(' + rIndex + ')" class="btn btn-xs btn-info" > <i class="material-icons">description</i> Delete</a>' ;
+                }
+            }
+        ];
+
+        var data3 = [
+            { "OrderLineID": 1, "Name": "Pineapple", "Price": 1.50, "Quantity": 4 },
+            { "OrderLineID": 2, "Name": "Fresh Spring Onions", "Price": 1.10, "Quantity": 40 },
+            { "OrderLineID": 3, "Name": "Oranges", "Price": 0.20, "Quantity": 8 },
+            { "OrderLineID": 4, "Name": "Apples", "Price": 1.50, "Quantity": 5 },
+        ];
+        function onChange(elem) {
+            var index = elem.getAttribute('data-index');
+            var name = elem.getAttribute('data-name');
+            data3[index][name] = elem.value;
+        }
+        function addItem(index) {
+            if (index == null) {
+                index = data3.length + 1;
+            }
+            data3.splice(index + 1, 0, { "OrderLineID": 6, "Name": "Avocado", "Price": 2.50, "Quantity": 9 });
+            hbcDetailGriCtl = new cTemplatedGridView('hbcDetailGrid', data3, cols2);
+
+        }
+        function deleteItem(index) {
+            data3.splice(index, 1);
+            hbcDetailGriCtl = new cTemplatedGridView('hbcDetailGrid', data3, cols2);
+        }
+
+        //array based format
+        /*
+        var arrayData = {
+            Columns: ["OrderLineID", "Name", "Price", "Quantity"]
+            , Data: [
+                [1, "Pineapple", 1.50, 4],
+                [2, "Fresh Spring Onions", 1.10, 40],
+                [3, "Oranges", 0.20, 8]
+            ]
+        }
+        */
+
+
+        function buildcGridView() {
+            var grid = new cGridView('hbcGridView', data2, cols);
+        }
+        var hbcDetailGriCtl;
+        function buildhbcDetailGrid() {
+            var hbcDetailGriCtl = new cTemplatedGridView('hbcDetailGrid', data3, cols2);
+        }
+        function buildcCardView() {
+            var source = document.getElementById("cardTemplate").innerHTML;
+            var cardTemplate = Handlebars.compile(source);
+            var grid = new cCardView('hbcCardView', data2, { getCardHtmlCallback: buildCardHtmlTemplate, PageSize: 18, CardSize: 4, CardTemplate: cardTemplate });
+        }
+
+        function buildCardHtmlTemplate(row, index, template) {
+            /* can also return HTML ...
+            var html = '<div class="row">';
+            html += '<div class="cell col-md-2">One</div>';
+            html += '</div>';*/
+            var html = template(row);
+            return html;
+        }
+        $(function () {
+            buildcGridView();
+            buildcCardView();
+            buildhbcDetailGrid();
+            //
+        });
+
+
+    </script>
+
 }
 
-<div class="jumbotron">
-    <h1>ASP.NET</h1>
-    <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS and JavaScript.</p>
-    <p><a href="https://asp.net" class="btn btn-primary btn-lg">Learn more &raquo;</a></p>
-</div>
-
-<div class="row">
-    <div class="col-md-4">
-        <h2>Getting started</h2>
-        <p>
-            ASP.NET MVC gives you a powerful, patterns-based way to build dynamic websites that
-            enables a clean separation of concerns and gives you full control over markup
-            for enjoyable, agile development.
-        </p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301865">Learn more &raquo;</a></p>
-    </div>
-    <div class="col-md-4">
-        <h2>Get more libraries</h2>
-        <p>NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.</p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301866">Learn more &raquo;</a></p>
-    </div>
-    <div class="col-md-4">
-        <h2>Web Hosting</h2>
-        <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301867">Learn more &raquo;</a></p>
-    </div>
-</div>
