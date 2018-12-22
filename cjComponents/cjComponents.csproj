@@ -208,7 +208,7 @@
     <Content Include="Scripts\calibre\DataComps\cDataAdaptor.js" />
     <Content Include="Scripts\calibre\DataComps\cForm.js" />
     <Content Include="Scripts\calibre\DataComps\cView-2.0.css" />
-    <Content Include="Scripts\calibre\DataComps\cViewOld.js" />
+    <Content Include="Scripts\calibre\DataComps\cView.js" />
     <Content Include="Scripts\calibre\desktop.js" />
     <Content Include="Scripts\calibre\FormBuider.js" />
     <Content Include="Scripts\calibre\FormKeyNavigator.js" />

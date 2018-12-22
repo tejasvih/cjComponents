@@ -16,14 +16,15 @@ class cBaseControl {
     PropertiesToIgnore: string[] = ['dataType'];
     private _value: any = null;
     private _html: string = '';
-
+    Element: any;
     constructor(controlTag: string, controlDef: any) {
         this.ControlTag = controlTag;
         if (controlDef != null)
             this.ControlDef = controlDef;
 
         this.PrepareProperties();
-        this.BuildHtml();
+        this.BuildHtmlObject();
+        //this.BuildHtml();
     }
     get Html() {
         return this._html;
@@ -33,6 +34,7 @@ class cBaseControl {
     }
     set Value(value: any) {
         this._value = value;
+        this.Element.setAttribute('value', value);
     }
     GetElementContent(value, index, attribs, prefix, suffix) {
         return null;
@@ -40,6 +42,7 @@ class cBaseControl {
     PrepareAdditionalProperties() {
         
     }
+    /*
     BuildHtml(value: any = null, index: number = null, attribs: any = null, prefix: string = null, suffix: string = null): string {
         let attribHtml: string = '';
 
@@ -113,19 +116,104 @@ class cBaseControl {
             this.IsInlineClosure = false;
         }
         if (this.IsInlineClosure) {
-            this.Html = '<' + this.ControlTag + ' ' + attribHtml + '/>';
+            this._html = '<' + this.ControlTag + ' ' + attribHtml + '/>';
         }
         else
-            this.Html = '<' + this.ControlTag + ' ' + attribHtml + '>' + (elemContent != null ? elemContent : '') + '</' + this.ControlTag + '>';
+            this._html = '<' + this.ControlTag + ' ' + attribHtml + '>' + (elemContent != null ? elemContent : '') + '</' + this.ControlTag + '>';
 
         return this.Html;
     }
-    /*
-    BuildHtmlObject(value, index, attribs, prefix, suffix) {
-        //let html: string = this.BuildHtml(value, index, attribs, prefix, suffix);
-        //TODO
-    }
     */
+    BuildHtmlObject(value: any = null, index: number = null, attribs: any = null, prefix: string = null, suffix: string = null) {
+        //let html: string = this.BuildHtml(value, index, attribs, prefix, suffix);
+        
+        this.Element = document.createElement(this.ControlTag);
+
+        Object.getOwnPropertyNames(this.Properties).forEach(
+            function (val, idx, array) {
+                //prepare names and ids based on supplied params
+                let attribVal: any = (typeof this.Properties[val] === 'string' ? this.Properties[val].replace("\"", "'") : this.Properties[val]);
+                switch (val.toLowerCase()) {
+                    case 'name': {
+                        if (index != null) {
+                            if (prefix != null) {
+                                attribVal = prefix + '[' + index + '].' + attribVal;
+                            }
+                            else
+                                attribVal = attribVal + '[' + index + ']';
+                        }
+                        if (prefix != null) {
+                            if (index == null)
+                                attribVal = prefix + '.' + attribVal;
+                        }
+                        if (suffix != null) {
+                            attribVal = attribVal + '.' + suffix;
+                        }
+                    }
+                        break;
+                    case 'id': {
+                        if (index != null) {
+                            if (prefix != null) {
+                                attribVal = prefix + '_' + index + '__' + attribVal;
+                            }
+                            else
+                                attribVal = attribVal + '_' + index;
+                        }
+                        if (prefix != null) {
+                            if (index == null)
+                                attribVal = prefix + '_' + attribVal;
+                        }
+                        if (suffix != null) {
+                            attribVal = attribVal + '_' + suffix;
+                        }
+                    }
+                        break;
+                    case 'value': {
+                        if (value != null) {
+                            attribVal = value;
+                        }
+                    }
+                        break;
+                }
+
+                if (attribVal != null)
+                    this.Element.setAttribute(val, attribVal);
+
+            }, this);
+
+            //Additional attribs
+            if (attribs != null) {
+                Object.getOwnPropertyNames(attribs).forEach(
+                    function (val, idx, array) {
+                        //prepare names and ids based on supplied params
+                        let attribVal: any = (typeof attribs[val] === 'string' ? attribs[val].replace("\"", "'") : attribs[val]);
+                        this.Element.setAttribute(val, attribVal);
+
+                    }, this);
+            }
+
+
+        if (value != null) {
+            this.Element.setAttribute('value', value);
+        }
+        else {
+            if (this.Value != null) {
+                this.Element.setAttribute('value', this.Value);
+            }
+        }
+
+        var elemContent = this.GetElementContent(value, index, attribs, prefix, suffix);
+        if (elemContent != null) {
+            this.Element.innerHTML = elemContent;
+        }
+
+        var wrap = document.createElement('div');
+        wrap.appendChild(this.Element.cloneNode(true));
+        this._html = wrap.innerHTML;
+
+        return this.Html;
+    }
+    
     PrepareProperties() {
         this.Properties = {};
 

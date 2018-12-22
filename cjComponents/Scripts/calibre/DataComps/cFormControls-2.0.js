@@ -26,19 +26,28 @@ var cBaseControl = /** @class */ (function () {
         this.Properties = {};
         this.PropertiesToIgnore = ['dataType'];
         this._value = null;
-        this.Html = '';
+        this._html = '';
         this.ControlTag = controlTag;
         if (controlDef != null)
             this.ControlDef = controlDef;
         this.PrepareProperties();
-        this.BuildHtml();
+        this.BuildHtmlObject();
+        //this.BuildHtml();
     }
+    Object.defineProperty(cBaseControl.prototype, "Html", {
+        get: function () {
+            return this._html;
+        },
+        enumerable: true,
+        configurable: true
+    });
     Object.defineProperty(cBaseControl.prototype, "Value", {
         get: function () {
             return this._value;
         },
         set: function (value) {
             this._value = value;
+            this.Element.setAttribute('value', value);
         },
         enumerable: true,
         configurable: true
@@ -48,17 +57,100 @@ var cBaseControl = /** @class */ (function () {
     };
     cBaseControl.prototype.PrepareAdditionalProperties = function () {
     };
-    cBaseControl.prototype.BuildHtml = function (value, index, attribs, prefix, suffix) {
+    /*
+    BuildHtml(value: any = null, index: number = null, attribs: any = null, prefix: string = null, suffix: string = null): string {
+        let attribHtml: string = '';
+
+        Object.getOwnPropertyNames(this.Properties).forEach(
+            function (val, idx, array) {
+                //prepare names and ids based on supplied params
+                let attribVal: string = (typeof this.Properties[val] === 'string' ? this.Properties[val].replace("\"", "'") : this.Properties[val]);
+                switch (val) {
+                    case 'name': {
+                        if (index != null) {
+                            if (prefix != null) {
+                                attribVal = prefix + '[' + index + '].' + attribVal;
+                            }
+                            else
+                                attribVal = attribVal + '[' + index + ']';
+                        }
+                        if (prefix != null) {
+                            if (index == null)
+                                attribVal = prefix + '.' + attribVal;
+                        }
+                        if (suffix != null) {
+                            attribVal = attribVal + '.' + suffix;
+                        }
+                    }
+                        break;
+                    case 'id': {
+                        if (index != null) {
+                            if (prefix != null) {
+                                attribVal = prefix + '_' + index + '__' + attribVal;
+                            }
+                            else
+                                attribVal = attribVal + '_' + index;
+                        }
+                        if (prefix != null) {
+                            if (index == null)
+                                attribVal = prefix + '_' + attribVal;
+                        }
+                        if (suffix != null) {
+                            attribVal = attribVal + '_' + suffix;
+                        }
+                    }
+                        break;
+                    case 'value': {
+                        if (value != null) {
+                            attribVal = value;
+                        }
+                    }
+                        break;
+                }
+                if (attribVal != null)
+                    attribHtml += val + '="' + attribVal + '" ';
+
+            }, this);
+        //Additional attribs
+        if (attribs != null) {
+            Object.getOwnPropertyNames(attribs).forEach(
+                function (val, idx, array) {
+                    //prepare names and ids based on supplied params
+                    let attribVal: string = (typeof attribs[val] === 'string' ? attribs[val].replace("\"", "'") : attribs[val]);
+                    attribHtml += val + '="' + attribVal + '" ';
+                }, this);
+        }
+
+
+        if ((this.Properties['value'] == null) && (value != null)) {
+            attribHtml += 'value="' + value + '" ';
+        }
+
+        var elemContent = this.GetElementContent(value, index, attribs, prefix, suffix);
+        if (elemContent != null) {
+            this.IsInlineClosure = false;
+        }
+        if (this.IsInlineClosure) {
+            this._html = '<' + this.ControlTag + ' ' + attribHtml + '/>';
+        }
+        else
+            this._html = '<' + this.ControlTag + ' ' + attribHtml + '>' + (elemContent != null ? elemContent : '') + '</' + this.ControlTag + '>';
+
+        return this.Html;
+    }
+    */
+    cBaseControl.prototype.BuildHtmlObject = function (value, index, attribs, prefix, suffix) {
+        //let html: string = this.BuildHtml(value, index, attribs, prefix, suffix);
         if (value === void 0) { value = null; }
         if (index === void 0) { index = null; }
         if (attribs === void 0) { attribs = null; }
         if (prefix === void 0) { prefix = null; }
         if (suffix === void 0) { suffix = null; }
-        var attribHtml = '';
+        this.Element = document.createElement(this.ControlTag);
         Object.getOwnPropertyNames(this.Properties).forEach(function (val, idx, array) {
             //prepare names and ids based on supplied params
             var attribVal = (typeof this.Properties[val] === 'string' ? this.Properties[val].replace("\"", "'") : this.Properties[val]);
-            switch (val) {
+            switch (val.toLowerCase()) {
                 case 'name':
                     {
                         if (index != null) {
@@ -104,36 +196,33 @@ var cBaseControl = /** @class */ (function () {
                     break;
             }
             if (attribVal != null)
-                attribHtml += val + '="' + attribVal + '" ';
+                this.Element.setAttribute(val, attribVal);
         }, this);
         //Additional attribs
         if (attribs != null) {
             Object.getOwnPropertyNames(attribs).forEach(function (val, idx, array) {
                 //prepare names and ids based on supplied params
                 var attribVal = (typeof attribs[val] === 'string' ? attribs[val].replace("\"", "'") : attribs[val]);
-                attribHtml += val + '="' + attribVal + '" ';
+                this.Element.setAttribute(val, attribVal);
             }, this);
         }
-        if ((this.Properties['value'] == null) && (value != null)) {
-            attribHtml += 'value="' + value + '" ';
+        if (value != null) {
+            this.Element.setAttribute('value', value);
+        }
+        else {
+            if (this.Value != null) {
+                this.Element.setAttribute('value', this.Value);
+            }
         }
         var elemContent = this.GetElementContent(value, index, attribs, prefix, suffix);
         if (elemContent != null) {
-            this.IsInlineClosure = false;
+            this.Element.innerHTML = elemContent;
         }
-        if (this.IsInlineClosure) {
-            this.Html = '<' + this.ControlTag + ' ' + attribHtml + '/>';
-        }
-        else
-            this.Html = '<' + this.ControlTag + ' ' + attribHtml + '>' + (elemContent != null ? elemContent : '') + '</' + this.ControlTag + '>';
+        var wrap = document.createElement('div');
+        wrap.appendChild(this.Element.cloneNode(true));
+        this._html = wrap.innerHTML;
         return this.Html;
     };
-    /*
-    BuildHtmlObject(value, index, attribs, prefix, suffix) {
-        //let html: string = this.BuildHtml(value, index, attribs, prefix, suffix);
-        //TODO
-    }
-    */
     cBaseControl.prototype.PrepareProperties = function () {
         this.Properties = {};
         /*Prepare Properties*/
