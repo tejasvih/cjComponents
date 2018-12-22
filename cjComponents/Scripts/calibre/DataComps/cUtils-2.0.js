@@ -16,4 +16,10 @@ function isFunction(v) {
     }
      * */
 }
+function EndsWith(text, word) {
+    var diff = text.length - word.length;
+    if (diff < 0)
+        return false;
+    return (text.lastIndexOf(word) === diff);
+}
 //# sourceMappingURL=cUtils-2.0.js.map
