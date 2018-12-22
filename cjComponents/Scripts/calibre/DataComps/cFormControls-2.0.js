@@ -25,29 +25,40 @@ var cBaseControl = /** @class */ (function () {
         this.ValidationPropertyMap = { message: 'data-msg' };
         this.Properties = {};
         this.PropertiesToIgnore = ['dataType'];
-        this._value = null;
-        this._html = '';
         this.ControlTag = controlTag;
         if (controlDef != null)
             this.ControlDef = controlDef;
         this.PrepareProperties();
-        this.BuildHtmlObject();
+        this.Build();
+        //this.BuildHtmlObject();
         //this.BuildHtml();
     }
+    cBaseControl.prototype.Build = function (value, index, attribs, prefix, suffix) {
+        if (value === void 0) { value = null; }
+        if (index === void 0) { index = null; }
+        if (attribs === void 0) { attribs = null; }
+        if (prefix === void 0) { prefix = null; }
+        if (suffix === void 0) { suffix = null; }
+        this.BuildHtmlObject(value, index, attribs, prefix, suffix);
+        return this;
+    };
     Object.defineProperty(cBaseControl.prototype, "Html", {
         get: function () {
-            return this._html;
+            var wrap = document.createElement('div');
+            wrap.appendChild(this.Element.cloneNode(true));
+            return wrap.innerHTML;
         },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(cBaseControl.prototype, "Value", {
         get: function () {
-            return this._value;
+            return this.Element.value;
         },
         set: function (value) {
-            this._value = value;
+            //this._value = value;
             this.Element.setAttribute('value', value);
+            //this.Element.value = value;
         },
         enumerable: true,
         configurable: true
@@ -149,7 +160,7 @@ var cBaseControl = /** @class */ (function () {
         this.Element = document.createElement(this.ControlTag);
         Object.getOwnPropertyNames(this.Properties).forEach(function (val, idx, array) {
             //prepare names and ids based on supplied params
-            var attribVal = (typeof this.Properties[val] === 'string' ? this.Properties[val].replace("\"", "'") : this.Properties[val]);
+            var attribVal = this.Properties[val]; //(typeof this.Properties[val] === 'string' ? this.Properties[val].replace("\"", "'") : this.Properties[val]);
             switch (val.toLowerCase()) {
                 case 'name':
                     {
@@ -208,20 +219,13 @@ var cBaseControl = /** @class */ (function () {
         }
         if (value != null) {
             this.Element.setAttribute('value', value);
-        }
-        else {
-            if (this.Value != null) {
-                this.Element.setAttribute('value', this.Value);
-            }
+            //this.Element.value = value;
         }
         var elemContent = this.GetElementContent(value, index, attribs, prefix, suffix);
         if (elemContent != null) {
             this.Element.innerHTML = elemContent;
         }
-        var wrap = document.createElement('div');
-        wrap.appendChild(this.Element.cloneNode(true));
-        this._html = wrap.innerHTML;
-        return this.Html;
+        return this.Element;
     };
     cBaseControl.prototype.PrepareProperties = function () {
         this.Properties = {};

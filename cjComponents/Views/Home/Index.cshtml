@@ -147,7 +147,7 @@
                 ctl: new cTextControl({ name: "FirstName", required: true, class: 'form-control', onblur: 'onChange(this)' }),
                 "render": function (sender, row, cIndex, rIndex) {
                     var attribs = {"data-index" : rIndex, "data-name" : 'Name'}
-                    return this.ctl.BuildHtml(row.Name, rIndex, attribs,'Details');
+                    return this.ctl.Build(row.Name, rIndex, attribs, 'Details').Html;
                     //var gid = row.OrderLineID;
                     //return '<input class="form-control" name="name[' + rIndex + ']" value="' + row.Name + '"></input>';
                 }
@@ -158,7 +158,7 @@
                 ctl: new cTextControl({ name: "Price", dataType: 'decimal', required: true, class: 'form-control', onblur: 'onChange(this)'}),
                 "render": function (sender, row, cIndex, rIndex) {
                     var attribs = { "data-index": rIndex, "data-name": 'Price' }
-                    return this.ctl.BuildHtml(row.Price,rIndex,attribs, 'Details');
+                    return this.ctl.Build(row.Price, rIndex, attribs, 'Details').Html;
                 }
             },
             {
@@ -166,7 +166,7 @@
                 , ctl: new cTextControl({ name: "Price", dataType: 'decimal', required: true, class: 'form-control', onblur: 'onChange(this)' }),
                 "render": function (sender, row, cIndex, rIndex) {
                     var attribs = { "data-index": rIndex, "data-name": 'Quantity' }
-                    return this.ctl.BuildHtml(row.Quantity,rIndex, attribs,'Details');
+                    return this.ctl.Build(row.Quantity, rIndex, attribs, 'Details').Html;
                 }
 
             },
@@ -178,7 +178,7 @@
                 ,render : function (sender, row, cIndex, rIndex) {
                     //return row.Discount == null ? '' : row.Discount;
                     var attribs = { "data-index": rIndex, "data-name": 'Discount' }
-                    return this.ctl.BuildHtml(row.Discount, rIndex, attribs, 'Details');
+                    return this.ctl.Build(row.Discount, rIndex, attribs, 'Details').Html;
                 }
             },
             {

@@ -14,8 +14,8 @@ class cBaseControl {
     ValidationPropertyMap: any = { message: 'data-msg' };
     Properties: any = {};
     PropertiesToIgnore: string[] = ['dataType'];
-    private _value: any = null;
-    private _html: string = '';
+    //private _value: any = null;
+    //private _html: string = '';
     Element: any;
     constructor(controlTag: string, controlDef: any) {
         this.ControlTag = controlTag;
@@ -23,18 +23,26 @@ class cBaseControl {
             this.ControlDef = controlDef;
 
         this.PrepareProperties();
-        this.BuildHtmlObject();
+        this.Build();
+        //this.BuildHtmlObject();
         //this.BuildHtml();
     }
+    Build(value: any = null, index: number = null, attribs: any = null, prefix: string = null, suffix: string = null) {
+        this.BuildHtmlObject(value, index, attribs, prefix, suffix);
+        return this;
+    }
     get Html() {
-        return this._html;
+        var wrap = document.createElement('div');
+        wrap.appendChild(this.Element.cloneNode(true));
+        return wrap.innerHTML;
     }
     get Value() {
-        return this._value;
+        return this.Element.value;
     }
     set Value(value: any) {
-        this._value = value;
+        //this._value = value;
         this.Element.setAttribute('value', value);
+        //this.Element.value = value;
     }
     GetElementContent(value, index, attribs, prefix, suffix) {
         return null;
@@ -132,7 +140,7 @@ class cBaseControl {
         Object.getOwnPropertyNames(this.Properties).forEach(
             function (val, idx, array) {
                 //prepare names and ids based on supplied params
-                let attribVal: any = (typeof this.Properties[val] === 'string' ? this.Properties[val].replace("\"", "'") : this.Properties[val]);
+                let attribVal: any = this.Properties[val];//(typeof this.Properties[val] === 'string' ? this.Properties[val].replace("\"", "'") : this.Properties[val]);
                 switch (val.toLowerCase()) {
                     case 'name': {
                         if (index != null) {
@@ -195,23 +203,16 @@ class cBaseControl {
 
         if (value != null) {
             this.Element.setAttribute('value', value);
+            //this.Element.value = value;
         }
-        else {
-            if (this.Value != null) {
-                this.Element.setAttribute('value', this.Value);
-            }
-        }
+        
 
         var elemContent = this.GetElementContent(value, index, attribs, prefix, suffix);
         if (elemContent != null) {
             this.Element.innerHTML = elemContent;
         }
 
-        var wrap = document.createElement('div');
-        wrap.appendChild(this.Element.cloneNode(true));
-        this._html = wrap.innerHTML;
-
-        return this.Html;
+        return this.Element;
     }
     
     PrepareProperties() {
