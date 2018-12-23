@@ -162,8 +162,7 @@ var cGridView = /** @class */ (function (_super) {
             _this.Render();
         };
         _this.ColumnsDefs = colDefs;
-        if (_this.IsHtmlBased)
-            _this.initHandlers();
+        _this.IsHtmlBased = false;
         _super.prototype.Render.call(_this);
         return _this;
     }
@@ -188,7 +187,6 @@ var cGridView = /** @class */ (function (_super) {
             var title = (col.title != null) ? col.title : '';
             var size = 1;
             var sortSpan = null;
-            //let sortCls: string = '';
             var headerColElement = GetElement('div', 'c-grid-cell ' + GetSizeClass(col.width), null, { "data-colindex": i });
             if ((col.name != null) && (col.name.trim() !== '')) {
                 if (col.sortable == null || col.sortable == true) {
@@ -308,14 +306,6 @@ var cGridView = /** @class */ (function (_super) {
                         while (children.length > 0) {
                             colElement.appendChild(children[0]);
                         }
-                    /*children.forEach(child => colElement.appendChild(child))
-                    
-                    if (Array.isArray(children)) {
-                        children.forEach(child => colElement.appendChild(child))
-                    } else {
-                        colElement.appendChild(children);
-                    }
-                    */
                 }
             }
             rowElement.appendChild(colElement);
@@ -324,99 +314,6 @@ var cGridView = /** @class */ (function (_super) {
         return rowElement;
     };
     ;
-    cGridView.prototype.initHandlers = function () {
-        //object event handlers
-        this.OnGetViewStartHtml = function (sender) {
-            var html = '<div class="c-grid-view">';
-            return html;
-        };
-        this.OnGetViewEndHtml = function (sender) {
-            var html = '</div>';
-            return html;
-        };
-        this.OnGetHeaderHtml = function (sender) {
-            var html = '<div class="c-grid-header-row row">';
-            this.ColumnsDefs.forEach(function (col, i) {
-                var title = (col.title != null) ? col.title : '';
-                var size = 1;
-                var sortSpan = '';
-                var sortCls = '';
-                if ((col.name != null) && (col.name.trim() !== '')) {
-                    sortCls = 'sorted';
-                    if (col.SortDirection === "asc") {
-                        sortSpan = '<span class="glyphicon glyphicon-arrow-up text-info" style="margin-left:4px;"></span>';
-                    }
-                    else if (col.SortDirection === "desc") {
-                        sortSpan = '<span class="glyphicon glyphicon-arrow-down text-info" style="margin-left:4px;"></span>';
-                    }
-                    else {
-                        sortSpan = '';
-                    }
-                }
-                if (col.width !== undefined) {
-                    size = col.width;
-                }
-                else {
-                    col.width = 1;
-                }
-                html += '<div style="cursor:pointer" data-colindex=' + i + ' class="c-grid-cell col-md-' + size + ' ' + sortCls + '">' + title + sortSpan + '</div>';
-            }, this);
-            html += '</div>';
-            return html;
-        };
-        this.OnGetFooterHtml = function (sender) {
-            if (this.Adaptor.TotalRecords < this.Adaptor.PageSize) {
-                return '';
-            }
-            var html = '<div class="c-grid-header-row row">';
-            var s = this.Adaptor.CurrentPage === 1 ? ' disabled ' : '';
-            var pagerStr = '<ul class="pagination pull-right" style="margin-top: 5px;margin-bottom: 5px">\
-            <li class="' + s + '"><a href="javascript:void(0)" class="pager-btn first" data-pagenumber="first"><span class="glyphicon glyphicon-fast-backward"></span></a></li>\
-            <li class="' + s + '"><a href="javascript:void(0)" class="pager-btn previous" data-pagenumber="prev"><span class="glyphicon glyphicon-step-backward"></span></a></li>';
-            for (var i = 1; i <= this.Adaptor.TotalPages; i++) {
-                var cls = '';
-                if (i === this.Adaptor.CurrentPage)
-                    cls = 'active';
-                pagerStr += '<li class="' + cls + '"><a href="javascript:void(0)" class="pager-btn pagenumber" data-pagenumber="' + i + '">' + i + '</a></li>';
-            }
-            s = this.Adaptor.CurrentPage === this.Adaptor.TotalPages ? ' disabled ' : '';
-            pagerStr += '<li class="' + s + '"><a href="javascript:void(0)" class="pager-btn next" data-pagenumber="next"><span class="glyphicon glyphicon-step-forward"></span></a></li>\
-            <li class="' + s + '"><a href="javascript:void(0)" class="pager-btn last" data-pagenumber="last"><span class="glyphicon glyphicon-fast-forward"></span></a></li>\
-        </ul> ';
-            html += pagerStr;
-            html += '</div>';
-            return html;
-        };
-        this.OnGetRecordHtml = function (sender, row, index) {
-            var html = '<div class="c-grid-row row">';
-            this.ColumnsDefs.forEach(function (col, cIndex) {
-                var content = '';
-                var size = col.width != null ? col.width : 1;
-                if (col.render != null) {
-                    content = col.render(sender, row, cIndex, index, col);
-                }
-                else {
-                    if ((col.name != null) && (col.name.trim() !== '') && (row[col.name] != null))
-                        content = row[col.name];
-                }
-                html += '<div class="c-grid-cell col-md-' + size + '">' + content + '</div>';
-            }, this);
-            html += '</div>';
-            return html;
-        };
-        this.OnAttachedToDOM = function (sender, container) {
-            var pagenums = container.getElementsByClassName("pager-btn");
-            for (var i = 0; i < pagenums.length; i++) {
-                //pagenums[i].myParam = {};
-                pagenums[i].addEventListener('click', this.changePageEvent, false);
-            }
-            var cells = container.getElementsByClassName("c-grid-header-row")[0].getElementsByClassName("sorted");
-            for (var i = 0; i < cells.length; i++) {
-                //cells[i].myParam = {};
-                cells[i].addEventListener('click', this.changeSortEvent, false);
-            }
-        };
-    };
     return cGridView;
 }(cView));
 /*
