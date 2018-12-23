@@ -20,6 +20,7 @@
                         </div>
 
                         <div id="hbcGridView"></div>
+                        <div id="hbcGrid2View"></div>
                         <div id="hbcDetailGrid"></div>
                         <br />
                         <a href="javascript:void(0)" onclick="addItem()" class="btn btn-xs btn-info"> <i class="material-icons">add_circle_outline</i> Add</a>
@@ -238,7 +239,8 @@
 
 
         function buildcGridView() {
-            var grid = new cGridView('hbcGridView', data2, cols);
+            //var grid = new cGridView('hbcGridView', data2, cols);
+            var grid2 = new cGridView('hbcGridView', data2, cols, { IsHtmlBased : false});
         }
         var hbcDetailGriCtl;
         function buildhbcDetailGrid() {

@@ -13,7 +13,7 @@ class cView {
 
     //[{ data: "Name", title: "Name", width: 4 }, {  },...
     ColumnsDefs: any[];
-
+    ViewElement: any;
 
     //events
     OnGetViewStartHtml: any;
@@ -25,18 +25,19 @@ class cView {
 
     OnGetDataViewStartHtml: any;
     OnGetDataViewEndHtml: any;
-
-
-    constructor(containerName: string, dataSource: any) {
-
+    IsHtmlBased: boolean = true;
+    Config: any;
+    constructor(containerName: string, dataSource: any, config: any) {
+        //, isHtmlBased: boolean = true
+        this.Config = config || {};
         this.Container = document.getElementById(containerName);
-        //this.self = this;
         this.Adaptor = new cDataAdaptor(dataSource);
+        this.IsHtmlBased = this.Config.IsHtmlBased == null ? true : this.Config.IsHtmlBased;
     }
 
 
 
-    private prepareView() {
+    private prepareViewHtml() {
         let html: string = '';
 
         //container start
@@ -78,10 +79,43 @@ class cView {
         }
 
     }
+    private prepareView() {
+        
+        
+        this.InitView();
+        this.CreateHeader(this.ViewElement);
+        let dataContainer = this.CreateDataContainer(this.ViewElement);
+        this.ViewElement.appendChild(dataContainer);
+        var data = this.Adaptor.GetData();
+        data.forEach(function (row, index) {
+            this.CreateRecord(dataContainer, row, index);
+        }, this);
+        this.CreateFooter(this.ViewElement);
+
+        //clear and set content on DOM
+        while (this.Container.lastChild) {
+            this.Container.removeChild(this.Container.lastChild);
+        }
+        this.Container.appendChild(this.ViewElement);
+    }
+
+    InitView() {
+        this.ViewElement = document.createElement('div');
+    }
+    CreateHeader(container) {}
+    CreateFooter(container) { }
+    CreateDataContainer(container) {
+        return document.createElement('div');
+    }
+    CreateRecord(container, row, index) {}
 
     //methods
     public Render() {
-        this.prepareView();
+        if (this.IsHtmlBased) {
+            this.prepareViewHtml()
+        }
+        else
+            this.prepareView();
     }
     public Sort(direction: string, colName: string) {
         this.Adaptor.Sort(direction, colName);
@@ -95,14 +129,198 @@ class cView {
  * */
 class cGridView extends cView {
 
-    constructor(containerName: string, dataSource: any, colDefs: any) {
-        super(containerName, dataSource);
+    IsFooterRequired: boolean = true;
+    _footer: string;
+
+    /*Material icon*/
+    sortUpClassName: string = 'arrow_drop_up';   //glyphicon glyphicon-arrow-up
+    sortDownClassName: string = 'arrow_drop_down'; //glyphicon glyphicon-arrow-down
+
+    pagerFirstClassName: string = 'first_page'; //glyphicon glyphicon-fast-backward
+    pagerPrevClassName: string = 'chevron_left'; //glyphicon-step-backward
+    pagerNextClassName: string = 'chevron_right'; //glyphicon glyphicon-step-forward
+    pagerLastClassName: string = 'last_page'; //glyphicon glyphicon-fast-forward
+
+    constructor(containerName: string, dataSource: any, colDefs: any, config: any) {
+        super(containerName, dataSource, config);
         this.ColumnsDefs = colDefs;
-        this.initHandlers();
+        if (this.IsHtmlBased)
+            this.initHandlers();
         super.Render();
     }
+    get Footer(): string {
+        return this._footer;
+    }
+    set Footer(footer: string) {
+        this._footer = footer;
+    }
 
+    InitView() {
+        super.InitView();
+        this.ViewElement.className += " c-grid-view";
+    }
+    
+    CreateHeader(container) {
+        super.CreateHeader(container);
+        let headerElement = GetElement('div', 'row c-grid-header-row');
+        this.ColumnsDefs.forEach(function (col, i) {
+            let title: string = (col.title != null) ? col.title : '';
+            let size: number = 1;
+            let sortSpan: any = null;
+            //let sortCls: string = '';
+            let headerColElement = GetElement('div', 'c-grid-cell ' + GetSizeClass(col.width) , null, { "data-colindex": i });
+            if ((col.name != null) && (col.name.trim() !== '')) {
+                
+                if (col.sortable == null || col.sortable == true) {
+                    headerColElement.className += ' sorted'
+                    headerColElement.style.cursor = 'pointer';
+                    headerColElement.onclick = this.changeSortEvent;
+                }
+                
+                if (col.SortDirection === "asc") {
+                    sortSpan = GetElement('span', this.sortUpClassName + ' text-info', 'margin-left:4px;');
+                }
+                else if (col.SortDirection === "desc") {
+                    sortSpan = GetElement('span', this.sortDownClassName + ' text-info', 'margin-left:4px;');
+                }
+                
+            }
+            
+            
+            
+            let textNode = document.createTextNode(title);
+            headerColElement.appendChild(textNode);
+            if (sortSpan)
+                headerColElement.appendChild(sortSpan);
+            headerElement.appendChild(headerColElement);
+        }, this);
+        container.appendChild(headerElement);
+        return headerElement;
+    };
+    CreateFooter(container) {
+        super.CreateFooter(container);
+        if (!this.IsFooterRequired)
+            return null;
 
+        let footerElement = GetElement('div', 'row c-grid-footer-row');
+        if (this.Footer) {
+            let textNode = document.createTextNode(this.Footer);
+            footerElement.appendChild(textNode);
+        }
+        
+        //create navigation pager
+        if (this.Adaptor.TotalRecords < this.Adaptor.PageSize) {
+            return footerElement;
+        }
+
+        let s: string = this.Adaptor.CurrentPage === 1 ? ' disabled ' : '';
+        let pagerElement = GetElement('nav');
+        let ul = GetElement('ul', 'pagination pull-right');
+        footerElement.appendChild(ul);
+        let li = GetElement('li', 'page-item ' + s);
+        //let a = GetElement('a', 'page-link first' + s, null, { "href": "javascript:void(0)", "data-pagenumber": "first" });
+        //let a = GetElement('a', 'page-link first' + s, null, { "href": "javascript:void(0)", "data": "pagenumber : 'first'" });
+        let a = GetElement('a', 'page-link first' + s, null, { "href": "javascript:void(0)", "pagenumber": "first" }, 'First');
+        a.dataset.pagenumber = 'first';
+        a.onclick  = this.changePageEvent;
+        //let span = GetElement('span', 'material-icons',null,null,this.pagerFirstClassName);//<i class="material-icons">description</i>
+
+        //let span = GetElement('span', null, null, null, 'First');
+        //a.appendChild(span);
+        li.appendChild(a);
+        ul.appendChild(li);
+
+        li = GetElement('li', 'page-item ' + s);
+        a = GetElement('a', 'page-link previous' + s, null, { "href": "javascript:void(0)", "pagenumber": "prev" },'Previous');
+        a.dataset.pagenumber = 'prev';
+        a.onclick = this.changePageEvent;
+        //span = GetElement('span', null,null,null,'Previous');
+        //a.appendChild(span);
+        li.appendChild(a);
+        ul.appendChild(li);
+
+       
+
+        for (let i = 1; i <= this.Adaptor.TotalPages; i++) {
+            let cls: string = '';
+            if (i === this.Adaptor.CurrentPage)
+                cls = 'active';
+            li = GetElement('li', 'page-item ' + cls);
+            a = GetElement('a', 'page-link pagenumber' + s, null, { "href": "javascript:void(0)", "pagenumber": i },i);
+            a.dataset.pagenumber = ''+i;
+            a.onclick = this.changePageEvent;
+            //let txt = document.createTextNode(''+i);
+            //a.appendChild(txt);
+            li.appendChild(a);
+            ul.appendChild(li);
+
+        }
+
+        s = this.Adaptor.CurrentPage === this.Adaptor.TotalPages ? ' disabled ' : '';
+
+        li = GetElement('li', 'page-item ' + s);
+        a = GetElement('a', 'page-link next' + s, null, { "href": "javascript:void(0)", "pagenumber": "next" }, 'Next');
+        a.dataset.pagenumber = 'next';
+        a.onclick = this.changePageEvent;
+        //span = GetElement('span', 'material-icons',null,null,this.pagerNextClassName);
+        //span = GetElement('span', null, null, null, 'Next');
+        //a.appendChild(span);
+        li.appendChild(a);
+        ul.appendChild(li);
+
+        li = GetElement('li', 'page-item ' + s);
+        a = GetElement('a', 'page-link last' + s, null, { "href": "javascript:void(0)", "pagenumber": "last" }, 'Last');
+        a.dataset.pagenumber = 'last';
+        a.onclick = this.changePageEvent;
+        //span = GetElement('span', 'material-icons',null,null,this.pagerLastClassName);
+        //span = GetElement('span', null, null, null, 'Last');
+        //a.appendChild(span);
+        li.appendChild(a);
+        ul.appendChild(li);
+        container.appendChild(footerElement);
+        return footerElement;
+    };
+
+    CreateRecord(container,  row, index) {
+    super.CreateRecord(container,  row, index);
+        let rowElement = GetElement('div', 'row c-grid-row');
+        this.ColumnsDefs.forEach(function (col, cIndex) {
+            let content: any;
+            if (col.render != null) {
+                content = col.render(this, row, cIndex, index, col);
+            }
+            else {
+                if ((col.name != null) && (col.name.trim() !== '') && (row[col.name] != null))
+                    content = row[col.name];
+            }
+            let colElement = GetElement('div', 'c-grid-cell ' + GetSizeClass(col.width));
+            if (content != null) {
+                if (IsObject(content)) {
+                    colElement.appendChild(content);
+                }
+                else {
+
+                    let children = GetElementFromHTML(content);
+                    if (children != null)
+                        while (children.length > 0) {
+                            colElement.appendChild(children[0]);
+                        }
+                    /*children.forEach(child => colElement.appendChild(child))
+                    
+                    if (Array.isArray(children)) {
+                        children.forEach(child => colElement.appendChild(child))
+                    } else {
+                        colElement.appendChild(children);
+                    }
+                    */
+                }
+
+            }
+            rowElement.appendChild(colElement);
+        }, this);
+        container.appendChild(rowElement);
+        return rowElement;
+    };
     private initHandlers() {
         //object event handlers
         this.OnGetViewStartHtml = function (sender) {
@@ -115,6 +333,7 @@ class cGridView extends cView {
             return html;
         };
 
+        
         this.OnGetHeaderHtml = function (sender) {
             let html: string = '<div class="c-grid-header-row row">';
             this.ColumnsDefs.forEach(function (col, i) {
@@ -212,7 +431,9 @@ class cGridView extends cView {
     private changePageEvent = (event: any) => {
         //'this' here represents element
         //use self
-        var pn = event.target.getAttribute('data-pagenumber');
+        //var pn = event.target.getAttribute('data-pagenumber');
+        //if (pn == null)
+        let pn = event.currentTarget.dataset.pagenumber;
         var oldPage = this.Adaptor.CurrentPage;
         if (pn === 'first')
             this.Adaptor.FirstPage();
@@ -271,7 +492,7 @@ class cCardView extends cView {
 
 
     constructor(containerName: string, data: any, options: any) {
-        super(containerName, data);
+        super(containerName, data, options);
         this.options = (options == null) ? {} : options;
         this.initHandlers();
         this.cardTemplate = options.CardTemplate;
@@ -387,8 +608,8 @@ class cTemplatedGridView extends cView {
 
 
 
-    constructor(containerName: string, data: any, colDefs: any) {
-        super(containerName, data);
+    constructor(containerName: string, data: any, colDefs: any, options: any) {
+        super(containerName, data, options);
         this.ColumnsDefs = colDefs;
         this.initHandlers();
         this.Adaptor.PageSize = 999;
