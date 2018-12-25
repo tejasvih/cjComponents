@@ -5,22 +5,22 @@
  * */
 "use strict";
 var cDataAdaptor = /** @class */ (function () {
-    function cDataAdaptor(dataSource) {
+    function cDataAdaptor(dataSource, columnNames) {
         this.IsRemoteData = false;
         //Input Can be array of objects or array of array. But data is converted to [{},{},{}] format
         //1. [{},{},{}]
         //2. { Columns: [array of string],Data : [[array of values],[],[]]}
-        this.Data = []; //format: [{},{},{}]
+        this.Data = []; //storage format: [{col: value},{col: value},...]
         this.Columns = [];
-        this.DataIsObjectArray = true;
+        //DataIsObjectArray: boolean = true;
         this.CurrentPage = 1; //value is 0 if no records exist or full data is retrieved using GetData() method
         this.TotalPages = 0;
         this.TotalRecords = 0;
         this._pageSize = 10;
         this.IsFirstPage = true;
         this.IsLastPage = true;
-        this.GetData = function (pageNo, pageSize) {
-            var data = (this.SortedData !== null && this.SortedData !== undefined) ? this.SortedData : this.Data;
+        //called by caller to fetch data
+        this.GetData = function (pageNo, pageSize, onDataCallback, postData) {
             this.IsFirstPage = true;
             this.IsLastPage = true;
             if ((pageNo !== undefined) && (pageNo > 0) && (pageNo < this.TotalPages)) {
@@ -31,25 +31,88 @@ var cDataAdaptor = /** @class */ (function () {
             }
             var startIndex = (this.CurrentPage - 1) * pageSize;
             var endIndex = startIndex + pageSize;
-            data = data.slice(startIndex, endIndex);
             this.IsFirstPage = this.CurrentPage === 1;
             this.IsLastPage = this.CurrentPage === this.TotalPages;
-            return data;
+            var resultData = [];
+            if (this.IsRemoteData) {
+                if (this.AjaxConfig) {
+                    //ajax
+                    var conf = {
+                        url: this.AjaxConfig.url,
+                        type: this.AjaxConfig.type,
+                        contentType: this.AjaxConfig.contentType,
+                        beforeSend: this.AjaxConfig.beforeSend,
+                        success: function (xhr, data) {
+                            resultData = this.checkAndGetData(data);
+                            if (this.onDataCallback) {
+                                onDataCallback(resultData);
+                            }
+                        },
+                        errorCallback: this.AjaxConfig.errorCallback,
+                    };
+                    var AjaxObj = new cAjax(conf);
+                    if (!isFunction(postData)) {
+                        postData = postData || {};
+                        postData.start = startIndex;
+                        postData.length = pageSize;
+                        postData.columns = [this.SortedColumnName];
+                        postData.order = [this.SortOrder];
+                        AjaxObj.Call(postData);
+                    }
+                    else {
+                        AjaxObj.Call(postData, {
+                            start: startIndex,
+                            length: pageSize,
+                            columns: [this.SortedColumnName],
+                            order: [this.SortOrder]
+                        });
+                    }
+                }
+                else {
+                    if (this.OnGetData) {
+                        var data = this.OnGetData(this.CurrentPage, this.PageSize, this.SortedColumnName, this.SortOrder);
+                        resultData = this.checkAndGetData(data);
+                    }
+                }
+            }
+            else {
+                resultData = (this.SortedData !== null && this.SortedData !== undefined) ? this.SortedData : this.Data;
+                resultData = resultData.slice(startIndex, endIndex);
+            }
+            return resultData;
         };
         this.PrevPage = function () {
             if (this.CurrentPage > 1)
                 this.CurrentPage--;
         };
-        //this.greeting = message;
-        this.loadData(dataSource);
+        if (isFunction(dataSource)) {
+            this.OnGetData = dataSource;
+            this.IsRemoteData = true;
+        }
+        else if ((typeof dataSource === 'object') && (dataSource.ajax !== undefined)) {
+            this.IsRemoteData = true;
+            this.AjaxConfig = dataSource.ajax;
+        }
+        else {
+            //data is supplied in any of two format
+            this.initPreLoadedData(dataSource);
+        }
+        this.Columns = columnNames !== undefined ? columnNames : [];
+        this._dataSource = dataSource;
+        //this.loadData(dataSource);
     }
     cDataAdaptor.prototype.convertData = function (data) {
-        //prepares array of objects from column and data
+        //data.Data
+        //data.Columns : optional, or can be set separately. otherwise __<index> is used as column name
+        //prepares array of objects to [{col: value},{col: value},...] format from column and data
+        if (data.Columns !== undefined) {
+            this.Columns = data.Columns;
+        }
         var preparedData = [];
-        data.forEach(function (row, rIndex) {
+        data.Data.forEach(function (row, rIndex) {
             var obj = {};
             row.forEach(function (val, index) {
-                var key = (this.Columns.length > index) ? this.Columns[index] : '' + index;
+                var key = (this.Columns.length > index) ? this.Columns[index] : '__' + index;
                 obj[key] = val;
             }, this);
             preparedData.push(obj);
@@ -57,55 +120,53 @@ var cDataAdaptor = /** @class */ (function () {
         return preparedData;
     };
     ;
-    cDataAdaptor.prototype.prepareColumnsFromData = function () {
-        //Builds column names from data
-        this.Columns = [];
-        this.Data.forEach(function (row, rIndex) {
-            Object.getOwnPropertyNames(row).forEach(function (val, idx, array) {
-                if (this.Columns.indexOf(val) < 0) {
-                    this.Columns.push(val);
-                }
-            }, this);
-        }, this);
+    cDataAdaptor.prototype.checkAndGetData = function (data) {
+        if (Array.isArray(data) && (data.length > 0 && (data[0] === 'object'))) {
+            //Data is in [{col: value},{col: value},...] format
+            return data;
+            //this.prepareColumnsFromData();
+        }
+        else if (typeof data === 'object') {
+            //data is either in data { Columns : [], Data : [] } format or array of values
+            return this.convertData(data);
+        }
     };
-    ;
+    cDataAdaptor.prototype.initPreLoadedData = function (dataSource) {
+        //loads and prepares if initially supplied data
+        //blank out data and return if data is not available
+        if (dataSource == null) {
+            this.Data = [];
+            this.Columns = [];
+            return;
+        }
+        this.Data = this.checkAndGetData(dataSource);
+        this.TotalRecords = this.Data.length;
+        this.TotalPages = Math.floor(this.TotalRecords / this.PageSize);
+        this.TotalPages += (this.TotalRecords % this.PageSize) > 0 ? 1 : 0;
+    };
     cDataAdaptor.prototype.loadData = function (dataSource) {
         this.TotalRecords = 0;
         this.TotalPages = 0;
         this.CurrentPage = 1;
         var data;
-        if (isFunction(data)) {
+        if (isFunction(dataSource)) {
             this.OnGetData = dataSource;
-            data = this.OnGetData();
-            //this.IsRemoteData = true;
+            data = this.OnGetData(this.CurrentPage, this.PageSize, this.SortedColumnName, this.SortOrder);
         }
         else {
             data = dataSource;
-            //this.IsRemoteData = false;
         }
-        //blank out data and return if data is not returned
+        //blank out data and return if data is not available
         if (data == null) {
             this.Data = [];
             this.Columns = [];
             return;
         }
-        if (Array.isArray(data)) {
-            this.Data = data;
-            this.prepareColumnsFromData();
-        }
-        else if (typeof data === 'object') {
-            if (data.Columns !== undefined) {
-                this.Columns = data.Columns;
-            }
-            if (data.Data !== undefined) {
-                this.Data = this.convertData(data.Data);
-            }
-        }
+        this.Data = this.checkAndGetData(data);
         this.TotalRecords = this.Data.length;
         this.TotalPages = Math.floor(this.TotalRecords / this.PageSize);
         this.TotalPages += (this.TotalRecords % this.PageSize) > 0 ? 1 : 0;
     };
-    ;
     //Public Methods
     cDataAdaptor.prototype.Sort = function (direction, colName) {
         if ((direction === undefined) || (direction === "")) {
@@ -116,6 +177,8 @@ var cDataAdaptor = /** @class */ (function () {
         }
         this.SortedColumnName = colName;
         this.SortOrder = direction;
+        if (this.IsRemoteData)
+            return; // do not sort remote data, its responsbility of remote data provider to provide sorted data as per parameter
         var sortOrder = 1;
         if (direction === "desc") {
             sortOrder = -1;
