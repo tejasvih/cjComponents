@@ -12,7 +12,10 @@ namespace cjComponents.Controllers
         {
             return View();
         }
+        public ActionResult Controls()
+        {
+            return View();
+        }
 
-      
     }
 }

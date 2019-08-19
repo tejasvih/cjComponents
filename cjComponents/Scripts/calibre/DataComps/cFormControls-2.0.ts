@@ -19,7 +19,7 @@ class cBaseControl {
     Element: any;
     constructor(controlTag: string, controlDef: any) {
         this.ControlTag = controlTag;
-        if (controlDef != null)
+        if ((controlDef != null) && (controlDef != undefined))
             this.ControlDef = controlDef;
 
         this.PrepareProperties();

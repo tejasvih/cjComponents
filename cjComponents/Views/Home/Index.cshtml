@@ -8,6 +8,9 @@
         vertical-align: middle;
     }
 </style>
+<link href="~/Scripts/calibre/DataComps/cView-2.0.css" rel="stylesheet" />
+
+
 <div class="content">
     <div class="container-fluid">
         <div class="row">
@@ -38,7 +41,7 @@
     </div>
 </div>
 
-<link href="~/Scripts/calibre/DataComps/cView-2.0.css" rel="stylesheet" />
+
 
 <script id="cardTemplate" type="x-handlebars-template">
     <div style="padding:5px;">
@@ -218,7 +221,6 @@
             }
             data3.splice(index + 1, 0, { "OrderLineID": 6, "Name": "Avocado", "Price": 2.50, "Quantity": 9 });
             hbcDetailGriCtl = new cTemplatedGridView('hbcDetailGrid', data3, cols2);
-
         }
         function deleteItem(index) {
             data3.splice(index, 1);
@@ -236,7 +238,6 @@
             ]
         }
         */
-
 
         function buildcGridView() {
             //var grid = new cGridView('hbcGridView', data2, cols);
@@ -263,8 +264,8 @@
         $(function () {
             //buildcGridView();
             //buildcCardView();
-            buildhbcDetailGrid();
-            //
+            //buildhbcDetailGrid();
+            
         });
 
 

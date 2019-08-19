@@ -109,19 +109,21 @@ var cDataAdaptor = /** @class */ (function () {
             this.Columns = data.Columns;
         }
         var preparedData = [];
-        data.Data.forEach(function (row, rIndex) {
-            var obj = {};
-            row.forEach(function (val, index) {
-                var key = (this.Columns.length > index) ? this.Columns[index] : '__' + index;
-                obj[key] = val;
+        if (data.Data != null) {
+            data.Data.forEach(function (row, rIndex) {
+                var obj = {};
+                row.forEach(function (val, index) {
+                    var key = (this.Columns.length > index) ? this.Columns[index] : '__' + index;
+                    obj[key] = val;
+                }, this);
+                preparedData.push(obj);
             }, this);
-            preparedData.push(obj);
-        }, this);
+        }
         return preparedData;
     };
     ;
     cDataAdaptor.prototype.checkAndGetData = function (data) {
-        if (Array.isArray(data) && (data.length > 0 && (data[0] === 'object'))) {
+        if (Array.isArray(data) && (data.length > 0 && (typeof data[0] === 'object'))) {
             //Data is in [{col: value},{col: value},...] format
             return data;
             //this.prepareColumnsFromData();

@@ -62,20 +62,23 @@ class cDataAdaptor {
         if (data.Columns !== undefined) {
             this.Columns = data.Columns;
         }
-        let preparedData : any[] = [];
-        data.Data.forEach(function (row, rIndex) {
-            let obj : any = {};
-            row.forEach(function (val, index) {
-                let key: number = (this.Columns.length > index) ? this.Columns[index] : '__' + index;
-                obj[key] = val;
-            }, this);
+        let preparedData: any[] = [];
+        if (data.Data != null) {
+            data.Data.forEach(function (row, rIndex) {
+                let obj: any = {};
+                row.forEach(function (val, index) {
+                    let key: number = (this.Columns.length > index) ? this.Columns[index] : '__' + index;
+                    obj[key] = val;
+                }, this);
 
-            preparedData.push(obj);
-        }, this);
+                preparedData.push(obj);
+            }, this);
+        }
+        
         return preparedData;
     };
     private checkAndGetData(data) {
-        if (Array.isArray(data) && (data.length > 0 && (data[0] === 'object'))) {
+        if (Array.isArray(data) && (data.length > 0 && (typeof data[0] === 'object'))) {
             //Data is in [{col: value},{col: value},...] format
             return data;
             //this.prepareColumnsFromData();

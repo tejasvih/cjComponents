@@ -26,7 +26,7 @@ var cBaseControl = /** @class */ (function () {
         this.Properties = {};
         this.PropertiesToIgnore = ['dataType'];
         this.ControlTag = controlTag;
-        if (controlDef != null)
+        if ((controlDef != null) && (controlDef != undefined))
             this.ControlDef = controlDef;
         this.PrepareProperties();
         this.Build();

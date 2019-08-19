@@ -67,7 +67,7 @@ var cView = /** @class */ (function () {
         //, isHtmlBased: boolean = true
         this.Config = config || {};
         this.Container = document.getElementById(containerName);
-        this.Adaptor = new cDataAdaptor(dataSource);
+        this.Adaptor = new cDataAdaptor(dataSource, []);
         //this.IsHtmlBased = this.Config.IsHtmlBased == null ? true : this.Config.IsHtmlBased;
     }
     Object.defineProperty(cView.prototype, "Footer", {
