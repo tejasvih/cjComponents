@@ -1,0 +1,27 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - Basic Layout</title>
+
+    <link href="~/Content/Site.css" rel="stylesheet" />
+    <link href="~/Scripts/calibre/DataComps/cView-2.0.css" rel="stylesheet" />
+    <script src="~/Scripts/calibre/DataComps/cUtils-2.0.js"></script>
+    <script src="~/Scripts/calibre/DataComps/cFormControls-2.0.js"></script>
+
+</head>
+<body>
+
+    <div class="container body-content">
+        @RenderBody()
+        <hr />
+        <footer>
+            <p>&copy; @DateTime.Now.Year - cjControls</p>
+        </footer>
+    </div>
+    <script src="~/Scripts/jquery-3.3.1.min.js"></script>
+    
+    @RenderSection("scripts", required: false)
+</body>
+</html>

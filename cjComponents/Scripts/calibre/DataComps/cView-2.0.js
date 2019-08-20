@@ -5,53 +5,39 @@
  * version 2.0
  * */
 "use strict";
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    }
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-var cView = /** @class */ (function () {
-    function cView(containerName, dataSource, config) {
-        var _this = this;
+class cView {
+    constructor(containerName, dataSource, config) {
         this.IsFooterRequired = true;
         this.IsHtmlBased = false;
-        this.changePageEvent = function (event) {
+        this.changePageEvent = (event) => {
             //'this' here represents element
             //use self
             var pn = event.target.getAttribute('data-pagenumber');
-            var oldPage = _this.Adaptor.CurrentPage;
+            var oldPage = this.Adaptor.CurrentPage;
             if (pn === 'first')
-                _this.Adaptor.FirstPage();
+                this.Adaptor.FirstPage();
             else if (pn === 'prev') {
-                _this.Adaptor.PrevPage();
+                this.Adaptor.PrevPage();
             }
             else if (pn === 'next') {
-                _this.Adaptor.NextPage();
+                this.Adaptor.NextPage();
             }
             else if (pn === 'last')
-                _this.Adaptor.LastPage();
+                this.Adaptor.LastPage();
             else
-                _this.Adaptor.GotoPage(parseInt(pn));
-            if (oldPage !== _this.Adaptor.CurrentPage)
-                _this.Render();
+                this.Adaptor.GotoPage(parseInt(pn));
+            if (oldPage !== this.Adaptor.CurrentPage)
+                this.Render();
         };
-        this.changeSortEvent = function (event) {
+        this.changeSortEvent = (event) => {
             //'this' here represents element
             var pn = parseInt(event.target.getAttribute('data-colindex'));
-            _this.ColumnsDefs.forEach(function (col, i) {
+            this.ColumnsDefs.forEach(function (col, i) {
                 if (pn !== i) {
                     col.SortDirection = "";
                 }
             });
-            var col = _this.ColumnsDefs[pn];
+            var col = this.ColumnsDefs[pn];
             if (col.SortDirection === "asc") {
                 col.SortDirection = "desc";
             }
@@ -61,8 +47,8 @@ var cView = /** @class */ (function () {
             else {
                 col.SortDirection = "asc";
             }
-            _this.Adaptor.Sort(col.SortDirection, col.name);
-            _this.Render();
+            this.Adaptor.Sort(col.SortDirection, col.name);
+            this.Render();
         };
         //, isHtmlBased: boolean = true
         this.Config = config || {};
@@ -70,20 +56,16 @@ var cView = /** @class */ (function () {
         this.Adaptor = new cDataAdaptor(dataSource, []);
         //this.IsHtmlBased = this.Config.IsHtmlBased == null ? true : this.Config.IsHtmlBased;
     }
-    Object.defineProperty(cView.prototype, "Footer", {
-        get: function () {
-            return this._footer;
-        },
-        set: function (footer) {
-            this._footer = footer;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    cView.prototype.prepareView = function () {
+    get Footer() {
+        return this._footer;
+    }
+    set Footer(footer) {
+        this._footer = footer;
+    }
+    prepareView() {
         this.InitView();
         this.CreateHeader(this.ViewElement);
-        var dataContainer = this.CreateDataContainer(this.ViewElement);
+        let dataContainer = this.CreateDataContainer(this.ViewElement);
         this.ViewElement.appendChild(dataContainer);
         var data = this.Adaptor.GetData();
         data.forEach(function (row, index) {
@@ -95,36 +77,36 @@ var cView = /** @class */ (function () {
             this.Container.removeChild(this.Container.lastChild);
         }
         this.Container.appendChild(this.ViewElement);
-    };
-    cView.prototype.InitView = function () {
+    }
+    InitView() {
         this.ViewElement = document.createElement('div');
-    };
-    cView.prototype.CreateHeader = function (container) { };
-    cView.prototype.CreateFooter = function (container) { };
-    cView.prototype.CreateDataContainer = function (container) {
+    }
+    CreateHeader(container) { }
+    CreateFooter(container) { }
+    CreateDataContainer(container) {
         return document.createElement('div');
-    };
-    cView.prototype.CreateRecord = function (container, row, index) { };
+    }
+    CreateRecord(container, row, index) { }
     //methods
-    cView.prototype.Render = function () {
+    Render() {
         this.prepareView();
-    };
-    cView.prototype.Sort = function (direction, colName) {
+    }
+    Sort(direction, colName) {
         this.Adaptor.Sort(direction, colName);
         this.Render();
-    };
-    cView.prototype.BuildPager = function (container) {
-        var pagerElement = GetElement('nav');
+    }
+    BuildPager(container) {
+        let pagerElement = GetElement('nav');
         container.appendChild(pagerElement);
-        var ul = GetElement('ul', 'pagination pull-right');
+        let ul = GetElement('ul', 'pagination pull-right');
         pagerElement.appendChild(ul);
-        var s = this.Adaptor.CurrentPage === 1 ? ' disabled ' : '';
-        var li = this.getPagingItem("first", 'First', s, ' first ' + s);
+        let s = this.Adaptor.CurrentPage === 1 ? ' disabled ' : '';
+        let li = this.getPagingItem("first", 'First', s, ' first ' + s);
         ul.appendChild(li);
         li = this.getPagingItem("prev", 'Previous', s, ' previous ' + s);
         ul.appendChild(li);
-        for (var i = 1; i <= this.Adaptor.TotalPages; i++) {
-            var cls = '';
+        for (let i = 1; i <= this.Adaptor.TotalPages; i++) {
+            let cls = '';
             if (i === this.Adaptor.CurrentPage)
                 cls = 'active';
             li = this.getPagingItem('' + i, '' + i, cls, ' pagenumber');
@@ -135,12 +117,12 @@ var cView = /** @class */ (function () {
         ul.appendChild(li);
         li = this.getPagingItem("last", 'Last', s, ' last ' + s);
         ul.appendChild(li);
-    };
-    cView.prototype.getPagingItem = function (val, title, itemcls, linkcls) {
-        var li = GetElement('li', 'page-item ' + itemcls);
+    }
+    getPagingItem(val, title, itemcls, linkcls) {
+        let li = GetElement('li', 'page-item ' + itemcls);
         //let a = GetElement('a', 'page-link first' + s, null, { "href": "javascript:void(0)", "data-pagenumber": "first" });
         //let a = GetElement('a', 'page-link first' + s, null, { "href": "javascript:void(0)", "data": "pagenumber : 'first'" });
-        var a = GetElement('a', 'page-link ' + linkcls, null, { "href": "javascript:void(0)", "pagenumber": val }, title);
+        let a = GetElement('a', 'page-link ' + linkcls, null, { "href": "javascript:void(0)", "pagenumber": val }, title);
         a.dataset.pagenumber = val;
         a.onclick = this.changePageEvent;
         //let span = GetElement('span', 'material-icons',null,null,this.pagerFirstClassName);//<i class="material-icons">description</i>
@@ -148,53 +130,50 @@ var cView = /** @class */ (function () {
         //a.appendChild(span);
         li.appendChild(a);
         return li;
-    };
-    cView.prototype.addContentToElement = function (content, element) {
+    }
+    addContentToElement(content, element) {
         if (content != null) {
             if (IsObject(content)) {
                 element.appendChild(content);
             }
             else {
-                var children = GetElementFromHTML(content);
+                let children = GetElementFromHTML(content);
                 if (children != null)
                     while (children.length > 0) {
                         element.appendChild(children[0]);
                     }
             }
         }
-    };
-    return cView;
-}());
+    }
+}
 /*
  * cGridView : Tabular Grid view
  * */
-var cGridView = /** @class */ (function (_super) {
-    __extends(cGridView, _super);
-    function cGridView(containerName, dataSource, colDefs, config) {
-        var _this = _super.call(this, containerName, dataSource, config) || this;
+class cGridView extends cView {
+    constructor(containerName, dataSource, colDefs, config) {
+        super(containerName, dataSource, config);
         /*Material icon*/
-        _this.sortUpClassName = 'arrow_drop_up'; //glyphicon glyphicon-arrow-up
-        _this.sortDownClassName = 'arrow_drop_down'; //glyphicon glyphicon-arrow-down
-        _this.pagerFirstClassName = 'first_page'; //glyphicon glyphicon-fast-backward
-        _this.pagerPrevClassName = 'chevron_left'; //glyphicon-step-backward
-        _this.pagerNextClassName = 'chevron_right'; //glyphicon glyphicon-step-forward
-        _this.pagerLastClassName = 'last_page'; //glyphicon glyphicon-fast-forward
-        _this.ColumnsDefs = colDefs;
-        _this.IsHtmlBased = false;
-        _super.prototype.Render.call(_this);
-        return _this;
+        this.sortUpClassName = 'arrow_drop_up'; //glyphicon glyphicon-arrow-up
+        this.sortDownClassName = 'arrow_drop_down'; //glyphicon glyphicon-arrow-down
+        this.pagerFirstClassName = 'first_page'; //glyphicon glyphicon-fast-backward
+        this.pagerPrevClassName = 'chevron_left'; //glyphicon-step-backward
+        this.pagerNextClassName = 'chevron_right'; //glyphicon glyphicon-step-forward
+        this.pagerLastClassName = 'last_page'; //glyphicon glyphicon-fast-forward
+        this.ColumnsDefs = colDefs;
+        this.IsHtmlBased = false;
+        super.Render();
     }
-    cGridView.prototype.InitView = function () {
-        _super.prototype.InitView.call(this);
+    InitView() {
+        super.InitView();
         this.ViewElement.className += " c-grid-view";
-    };
-    cGridView.prototype.CreateHeader = function (container) {
-        _super.prototype.CreateHeader.call(this, container);
-        var headerElement = GetElement('div', 'row c-grid-header-row');
+    }
+    CreateHeader(container) {
+        super.CreateHeader(container);
+        let headerElement = GetElement('div', 'row c-grid-header-row');
         this.ColumnsDefs.forEach(function (col, i) {
-            var title = (col.title != null) ? col.title : '';
-            var sortSpan = null;
-            var headerColElement = GetElement('div', 'c-grid-cell ' + GetSizeClass(col.width), null, { "data-colindex": i });
+            let title = (col.title != null) ? col.title : '';
+            let sortSpan = null;
+            let headerColElement = GetElement('div', 'c-grid-cell ' + GetSizeClass(col.width), null, { "data-colindex": i });
             if ((col.name != null) && (col.name.trim() !== '')) {
                 if (col.sortable == null || col.sortable == true) {
                     headerColElement.className += ' sorted';
@@ -208,7 +187,7 @@ var cGridView = /** @class */ (function (_super) {
                     sortSpan = GetElement('span', this.sortDownClassName + ' text-info', 'margin-left:4px;');
                 }
             }
-            var textNode = document.createTextNode(title);
+            let textNode = document.createTextNode(title);
             headerColElement.appendChild(textNode);
             if (sortSpan)
                 headerColElement.appendChild(sortSpan);
@@ -216,15 +195,15 @@ var cGridView = /** @class */ (function (_super) {
         }, this);
         container.appendChild(headerElement);
         return headerElement;
-    };
+    }
     ;
-    cGridView.prototype.CreateFooter = function (container) {
-        _super.prototype.CreateFooter.call(this, container);
+    CreateFooter(container) {
+        super.CreateFooter(container);
         if (!this.IsFooterRequired)
             return null;
-        var footerElement = GetElement('div', 'row c-grid-footer-row');
+        let footerElement = GetElement('div', 'row c-grid-footer-row');
         if (this.Footer) {
-            var textNode = document.createTextNode(this.Footer);
+            let textNode = document.createTextNode(this.Footer);
             footerElement.appendChild(textNode);
         }
         //create navigation pager
@@ -234,13 +213,13 @@ var cGridView = /** @class */ (function (_super) {
         this.BuildPager(footerElement);
         container.appendChild(footerElement);
         return footerElement;
-    };
+    }
     ;
-    cGridView.prototype.CreateRecord = function (container, row, index) {
-        _super.prototype.CreateRecord.call(this, container, row, index);
-        var rowElement = GetElement('div', 'row c-grid-row');
+    CreateRecord(container, row, index) {
+        super.CreateRecord(container, row, index);
+        let rowElement = GetElement('div', 'row c-grid-row');
         this.ColumnsDefs.forEach(function (col, cIndex) {
-            var content;
+            let content;
             if (col.render != null) {
                 content = col.render(this, row, cIndex, index, col);
             }
@@ -248,48 +227,45 @@ var cGridView = /** @class */ (function (_super) {
                 if ((col.name != null) && (col.name.trim() !== '') && (row[col.name] != null))
                     content = row[col.name];
             }
-            var colElement = GetElement('div', 'c-grid-cell ' + GetSizeClass(col.width));
+            let colElement = GetElement('div', 'c-grid-cell ' + GetSizeClass(col.width));
             this.addContentToElement(content, colElement);
             rowElement.appendChild(colElement);
         }, this);
         container.appendChild(rowElement);
         return rowElement;
-    };
+    }
     ;
-    return cGridView;
-}(cView));
+}
 /*
  * cCardView : Card Grid view
  * */
-var cCardView = /** @class */ (function (_super) {
-    __extends(cCardView, _super);
-    function cCardView(containerName, data, options) {
-        var _this = _super.call(this, containerName, data, options) || this;
-        _this.options = (options == null) ? {} : options;
-        _this.cardTemplate = options.CardTemplate;
-        _this.Adaptor.PageSize = (_this.options.PageSize === undefined) ? 3 : _this.options.PageSize;
-        _this.cardSize = (options.CardSize === undefined) ? 3 : options.CardSize;
-        _this.IsHtmlBased = false;
-        _this.OnGetCardHtml = options.getCardHtmlCallback;
-        _super.prototype.Render.call(_this);
-        return _this;
+class cCardView extends cView {
+    constructor(containerName, data, options) {
+        super(containerName, data, options);
+        this.options = (options == null) ? {} : options;
+        this.cardTemplate = options.CardTemplate;
+        this.Adaptor.PageSize = (this.options.PageSize === undefined) ? 3 : this.options.PageSize;
+        this.cardSize = (options.CardSize === undefined) ? 3 : options.CardSize;
+        this.IsHtmlBased = false;
+        this.OnGetCardHtml = options.getCardHtmlCallback;
+        super.Render();
     }
-    cCardView.prototype.InitView = function () {
-        _super.prototype.InitView.call(this);
+    InitView() {
+        super.InitView();
         this.ViewElement.className += " card-grid";
-    };
-    cCardView.prototype.CreateDataContainer = function (container) {
-        var element = _super.prototype.CreateDataContainer.call(this, container);
+    }
+    CreateDataContainer(container) {
+        let element = super.CreateDataContainer(container);
         element.className += " row";
         return element;
-    };
-    cCardView.prototype.CreateFooter = function (container) {
-        _super.prototype.CreateFooter.call(this, container);
+    }
+    CreateFooter(container) {
+        super.CreateFooter(container);
         if (!this.IsFooterRequired)
             return null;
-        var footerElement = GetElement('div', 'row card-grid-footer');
+        let footerElement = GetElement('div', 'row card-grid-footer');
         if (this.Footer) {
-            var textNode = document.createTextNode(this.Footer);
+            let textNode = document.createTextNode(this.Footer);
             footerElement.appendChild(textNode);
         }
         //create navigation pager
@@ -299,63 +275,60 @@ var cCardView = /** @class */ (function (_super) {
         this.BuildPager(footerElement);
         container.appendChild(footerElement);
         return footerElement;
-    };
-    cCardView.prototype.CreateRecord = function (container, row, index) {
-        _super.prototype.CreateRecord.call(this, container, row, index);
-        var cardContainerElement = GetElement('div', GetSizeClass(this.cardSize));
+    }
+    CreateRecord(container, row, index) {
+        super.CreateRecord(container, row, index);
+        let cardContainerElement = GetElement('div', GetSizeClass(this.cardSize));
         container.appendChild(cardContainerElement);
-        var cardElement = GetElement('div', 'card');
+        let cardElement = GetElement('div', 'card');
         cardContainerElement.appendChild(cardElement);
         if (this.OnGetCardHtml != null) {
-            var content = this.OnGetCardHtml(row, index, this.cardTemplate);
+            let content = this.OnGetCardHtml(row, index, this.cardTemplate);
             this.addContentToElement(content, cardElement);
         }
         return cardContainerElement;
-    };
+    }
     ;
-    return cCardView;
-}(cView));
+}
 /*
  * cGridView : Tabular Grid view
  * */
 //function (container, dataSource, colDefs) {
-var cTemplatedGridView = /** @class */ (function (_super) {
-    __extends(cTemplatedGridView, _super);
-    function cTemplatedGridView(containerName, data, colDefs, options) {
-        var _this = _super.call(this, containerName, data, options) || this;
-        _this.ColumnsDefs = colDefs;
+class cTemplatedGridView extends cView {
+    constructor(containerName, data, colDefs, options) {
+        super(containerName, data, options);
+        this.ColumnsDefs = colDefs;
         //this.initHandlers();
-        _this.Adaptor.PageSize = 999;
-        _super.prototype.Render.call(_this);
-        return _this;
+        this.Adaptor.PageSize = 999;
+        super.Render();
     }
-    cTemplatedGridView.prototype.InitView = function () {
-        _super.prototype.InitView.call(this);
+    InitView() {
+        super.InitView();
         this.ViewElement.className += " c-grid-view";
-    };
-    cTemplatedGridView.prototype.CreateDataContainer = function (container) {
-        var element = _super.prototype.CreateDataContainer.call(this, container);
+    }
+    CreateDataContainer(container) {
+        let element = super.CreateDataContainer(container);
         element.className += " c-grid-data-container";
         return element;
-    };
-    cTemplatedGridView.prototype.CreateHeader = function (container) {
-        _super.prototype.CreateHeader.call(this, container);
-        var headerElement = GetElement('div', 'row c-grid-header-row');
+    }
+    CreateHeader(container) {
+        super.CreateHeader(container);
+        let headerElement = GetElement('div', 'row c-grid-header-row');
         this.ColumnsDefs.forEach(function (col, i) {
-            var title = (col.title != null) ? col.title : '';
-            var headerColElement = GetElement('div', 'c-grid-cell ' + GetSizeClass(col.width), null, { "data-colindex": i });
-            var textNode = document.createTextNode(title);
+            let title = (col.title != null) ? col.title : '';
+            let headerColElement = GetElement('div', 'c-grid-cell ' + GetSizeClass(col.width), null, { "data-colindex": i });
+            let textNode = document.createTextNode(title);
             headerColElement.appendChild(textNode);
             headerElement.appendChild(headerColElement);
         }, this);
         container.appendChild(headerElement);
         return headerElement;
-    };
-    cTemplatedGridView.prototype.CreateRecord = function (container, row, index) {
-        _super.prototype.CreateRecord.call(this, container, row, index);
-        var rowElement = GetElement('div', 'row c-grid-row');
+    }
+    CreateRecord(container, row, index) {
+        super.CreateRecord(container, row, index);
+        let rowElement = GetElement('div', 'row c-grid-row');
         this.ColumnsDefs.forEach(function (col, cIndex) {
-            var content;
+            let content;
             if (col.render != null) {
                 content = col.render(this, row, cIndex, index, col);
             }
@@ -363,13 +336,12 @@ var cTemplatedGridView = /** @class */ (function (_super) {
                 if ((col.name != null) && (col.name.trim() !== '') && (row[col.name] != null))
                     content = row[col.name];
             }
-            var colElement = GetElement('div', 'c-grid-cell ' + GetSizeClass(col.width));
+            let colElement = GetElement('div', 'c-grid-cell ' + GetSizeClass(col.width));
             this.addContentToElement(content, colElement);
             rowElement.appendChild(colElement);
         }, this);
         container.appendChild(rowElement);
         return rowElement;
-    };
-    return cTemplatedGridView;
-}(cView));
+    }
+}
 //# sourceMappingURL=cView-2.0.js.map

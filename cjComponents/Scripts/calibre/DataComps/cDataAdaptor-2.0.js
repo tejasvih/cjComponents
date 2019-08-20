@@ -4,8 +4,8 @@
  * Tejasvi Hegde
  * */
 "use strict";
-var cDataAdaptor = /** @class */ (function () {
-    function cDataAdaptor(dataSource, columnNames) {
+class cDataAdaptor {
+    constructor(dataSource, columnNames) {
         this.IsRemoteData = false;
         //Input Can be array of objects or array of array. But data is converted to [{},{},{}] format
         //1. [{},{},{}]
@@ -29,15 +29,15 @@ var cDataAdaptor = /** @class */ (function () {
             if (pageSize === undefined) {
                 pageSize = this.PageSize;
             }
-            var startIndex = (this.CurrentPage - 1) * pageSize;
-            var endIndex = startIndex + pageSize;
+            let startIndex = (this.CurrentPage - 1) * pageSize;
+            let endIndex = startIndex + pageSize;
             this.IsFirstPage = this.CurrentPage === 1;
             this.IsLastPage = this.CurrentPage === this.TotalPages;
-            var resultData = [];
+            let resultData = [];
             if (this.IsRemoteData) {
                 if (this.AjaxConfig) {
                     //ajax
-                    var conf = {
+                    let conf = {
                         url: this.AjaxConfig.url,
                         type: this.AjaxConfig.type,
                         contentType: this.AjaxConfig.contentType,
@@ -50,7 +50,7 @@ var cDataAdaptor = /** @class */ (function () {
                         },
                         errorCallback: this.AjaxConfig.errorCallback,
                     };
-                    var AjaxObj = new cAjax(conf);
+                    let AjaxObj = new cAjax(conf);
                     if (!isFunction(postData)) {
                         postData = postData || {};
                         postData.start = startIndex;
@@ -70,7 +70,7 @@ var cDataAdaptor = /** @class */ (function () {
                 }
                 else {
                     if (this.OnGetData) {
-                        var data = this.OnGetData(this.CurrentPage, this.PageSize, this.SortedColumnName, this.SortOrder);
+                        let data = this.OnGetData(this.CurrentPage, this.PageSize, this.SortedColumnName, this.SortOrder);
                         resultData = this.checkAndGetData(data);
                     }
                 }
@@ -101,28 +101,28 @@ var cDataAdaptor = /** @class */ (function () {
         this._dataSource = dataSource;
         //this.loadData(dataSource);
     }
-    cDataAdaptor.prototype.convertData = function (data) {
+    convertData(data) {
         //data.Data
         //data.Columns : optional, or can be set separately. otherwise __<index> is used as column name
         //prepares array of objects to [{col: value},{col: value},...] format from column and data
         if (data.Columns !== undefined) {
             this.Columns = data.Columns;
         }
-        var preparedData = [];
+        let preparedData = [];
         if (data.Data != null) {
             data.Data.forEach(function (row, rIndex) {
-                var obj = {};
+                let obj = {};
                 row.forEach(function (val, index) {
-                    var key = (this.Columns.length > index) ? this.Columns[index] : '__' + index;
+                    let key = (this.Columns.length > index) ? this.Columns[index] : '__' + index;
                     obj[key] = val;
                 }, this);
                 preparedData.push(obj);
             }, this);
         }
         return preparedData;
-    };
+    }
     ;
-    cDataAdaptor.prototype.checkAndGetData = function (data) {
+    checkAndGetData(data) {
         if (Array.isArray(data) && (data.length > 0 && (typeof data[0] === 'object'))) {
             //Data is in [{col: value},{col: value},...] format
             return data;
@@ -132,8 +132,8 @@ var cDataAdaptor = /** @class */ (function () {
             //data is either in data { Columns : [], Data : [] } format or array of values
             return this.convertData(data);
         }
-    };
-    cDataAdaptor.prototype.initPreLoadedData = function (dataSource) {
+    }
+    initPreLoadedData(dataSource) {
         //loads and prepares if initially supplied data
         //blank out data and return if data is not available
         if (dataSource == null) {
@@ -145,12 +145,12 @@ var cDataAdaptor = /** @class */ (function () {
         this.TotalRecords = this.Data.length;
         this.TotalPages = Math.floor(this.TotalRecords / this.PageSize);
         this.TotalPages += (this.TotalRecords % this.PageSize) > 0 ? 1 : 0;
-    };
-    cDataAdaptor.prototype.loadData = function (dataSource) {
+    }
+    loadData(dataSource) {
         this.TotalRecords = 0;
         this.TotalPages = 0;
         this.CurrentPage = 1;
-        var data;
+        let data;
         if (isFunction(dataSource)) {
             this.OnGetData = dataSource;
             data = this.OnGetData(this.CurrentPage, this.PageSize, this.SortedColumnName, this.SortOrder);
@@ -168,9 +168,9 @@ var cDataAdaptor = /** @class */ (function () {
         this.TotalRecords = this.Data.length;
         this.TotalPages = Math.floor(this.TotalRecords / this.PageSize);
         this.TotalPages += (this.TotalRecords % this.PageSize) > 0 ? 1 : 0;
-    };
+    }
     //Public Methods
-    cDataAdaptor.prototype.Sort = function (direction, colName) {
+    Sort(direction, colName) {
         if ((direction === undefined) || (direction === "")) {
             this.SortedColumnName = null;
             this.SortOrder = null;
@@ -181,7 +181,7 @@ var cDataAdaptor = /** @class */ (function () {
         this.SortOrder = direction;
         if (this.IsRemoteData)
             return; // do not sort remote data, its responsbility of remote data provider to provide sorted data as per parameter
-        var sortOrder = 1;
+        let sortOrder = 1;
         if (direction === "desc") {
             sortOrder = -1;
         }
@@ -192,42 +192,37 @@ var cDataAdaptor = /** @class */ (function () {
                 return 1 * sortOrder;
             return 0;
         });
-    };
-    cDataAdaptor.prototype.FirstPage = function () {
+    }
+    FirstPage() {
         this.CurrentPage = 1;
-    };
-    cDataAdaptor.prototype.NextPage = function () {
+    }
+    NextPage() {
         if (this.CurrentPage < this.TotalPages)
             this.CurrentPage++;
-    };
-    cDataAdaptor.prototype.LastPage = function () {
+    }
+    LastPage() {
         this.CurrentPage = this.TotalPages;
-    };
-    cDataAdaptor.prototype.GotoPage = function (pageNo) {
+    }
+    GotoPage(pageNo) {
         if (pageNo < 1)
             pageNo = 1;
         if (pageNo > this.TotalPages)
             pageNo = this.TotalPages;
         this.CurrentPage = pageNo;
-    };
-    cDataAdaptor.prototype.RecordAt = function (index) {
+    }
+    RecordAt(index) {
         if ((index >= 0) && (index < this.TotalRecords))
             return this.Data[index];
         return null;
-    };
-    Object.defineProperty(cDataAdaptor.prototype, "PageSize", {
-        get: function () {
-            return this._pageSize;
-        },
-        set: function (pageSize) {
-            this._pageSize = pageSize;
-            this.TotalRecords = this.Data.length;
-            this.TotalPages = Math.floor(this.TotalRecords / this.PageSize);
-            this.TotalPages += (this.TotalRecords % this.PageSize) > 0 ? 1 : 0;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    return cDataAdaptor;
-}());
+    }
+    get PageSize() {
+        return this._pageSize;
+    }
+    set PageSize(pageSize) {
+        this._pageSize = pageSize;
+        this.TotalRecords = this.Data.length;
+        this.TotalPages = Math.floor(this.TotalRecords / this.PageSize);
+        this.TotalPages += (this.TotalRecords % this.PageSize) > 0 ? 1 : 0;
+    }
+}
 //# sourceMappingURL=cDataAdaptor-2.0.js.map

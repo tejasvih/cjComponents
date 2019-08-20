@@ -19,18 +19,26 @@ function isFunction(v) {
 function IsObject(obj) {
     return obj === Object(obj) && Object.prototype.toString.call(obj) !== '[object Array]';
 }
+function IsArray(obj) {
+    return Array.isArray(obj);
+}
+function IsString(obj) {
+    return (typeof obj === 'string');
+}
+function IsBoolean(obj) {
+    return (typeof obj === 'boolean');
+}
+function IsNumber(obj) {
+    return (typeof obj === 'number');
+}
 function EndsWith(text, word) {
     var diff = text.length - word.length;
     if (diff < 0)
         return false;
     return (text.lastIndexOf(word) === diff);
 }
-function GetElement(tag, cls, style, attribs, content) {
-    if (cls === void 0) { cls = null; }
-    if (style === void 0) { style = null; }
-    if (attribs === void 0) { attribs = null; }
-    if (content === void 0) { content = null; }
-    var element = document.createElement(tag);
+function GetElement(tag, cls = null, style = null, attribs = null, content = null) {
+    let element = document.createElement(tag);
     if (cls) {
         element.className += " " + cls;
     }
@@ -43,7 +51,7 @@ function GetElement(tag, cls, style, attribs, content) {
         }, this);
     }
     if (content != null) {
-        var children = GetElementFromHTML(content);
+        let children = GetElementFromHTML(content);
         if (children != null)
             while (children.length > 0) {
                 element.appendChild(children[0]);
@@ -52,7 +60,7 @@ function GetElement(tag, cls, style, attribs, content) {
     return element;
 }
 function GetElementFromHTML(htmlString) {
-    var div = document.createElement('div');
+    let div = document.createElement('div');
     div.innerHTML = htmlString;
     return div.childNodes;
 }
@@ -60,14 +68,13 @@ function GetElementFromHTML(htmlString) {
  * Created to get bootstrap width from unit
  * @param width object or number. If object { md : 1, xs : 1 etc..}
  */
-function GetSizeClass(width, defWidth) {
-    if (defWidth === void 0) { defWidth = 1; }
+function GetSizeClass(width, defWidth = 1) {
     if (width == null)
         width = defWidth;
     if (typeof width === 'number') {
         return 'col-' + width;
     }
-    var str = '';
+    let str = '';
     if (typeof width === 'object') {
         Object.getOwnPropertyNames(width).forEach(function (val, idx, array) {
             str += ' col-' + val + '-' + width[val];
@@ -75,8 +82,8 @@ function GetSizeClass(width, defWidth) {
     }
     return '';
 }
-var cAjax = /** @class */ (function () {
-    function cAjax(config) {
+class cAjax {
+    constructor(config) {
         /*Config Structure
             url:"reqesting URL"
             
@@ -103,14 +110,12 @@ var cAjax = /** @class */ (function () {
         this.Config = config;
         this.XMLhttp.onreadystatechange = this.readyStateChange;
     }
-    cAjax.prototype.Call = function (data, dataParams) {
-        if (data === void 0) { data = null; }
-        if (dataParams === void 0) { dataParams = null; }
+    Call(data = null, dataParams = null) {
         /*
          data:  another Nested Object which should contains reqested Properties in form of Object Properties, or can be function
          dataParams :  (OPTIONAL) parameters to be passed if data is function
          * */
-        var sendString, sendData = isFunction(data) ? data(dataParams) : data;
+        let sendString, sendData = isFunction(data) ? data(dataParams) : data;
         /*
          * let vals: any[] = []
          *
@@ -158,8 +163,8 @@ var cAjax = /** @class */ (function () {
             this.XMLhttp.setRequestHeader("Content-type", this.Config.contentType);
             this.XMLhttp.send(sendString);
         }
-    };
-    cAjax.prototype.readyStateChange = function () {
+    }
+    readyStateChange() {
         if (this.XMLhttp.readyState == 4 && this.XMLhttp.status == 200) {
             if (this.Config.success) {
                 if (this.Config.contentType = 'application/json') {
@@ -175,7 +180,6 @@ var cAjax = /** @class */ (function () {
                 this.Config.errorCallback(this.XMLhttp);
             }
         }
-    };
-    return cAjax;
-}());
+    }
+}
 //# sourceMappingURL=cUtils-2.0.js.map

@@ -20,6 +20,19 @@ function isFunction(v) {
 function IsObject(obj) {
     return obj === Object(obj) && Object.prototype.toString.call(obj) !== '[object Array]'
 }
+function IsArray(obj) {
+    return Array.isArray(obj)
+}
+function IsString(obj) {
+    return (typeof obj === 'string')
+}
+function IsBoolean(obj) {
+    return (typeof obj === 'boolean')
+}
+function IsNumber(obj) {
+    return (typeof obj === 'number')
+}
+
 function EndsWith(text, word) {
     var diff = text.length - word.length;
     if (diff < 0)
@@ -61,6 +74,7 @@ function GetElementFromHTML(htmlString) {
  * Created to get bootstrap width from unit
  * @param width object or number. If object { md : 1, xs : 1 etc..}
  */
+
 function GetSizeClass(width : any,defWidth : number = 1) {
     if (width == null)
         width = defWidth;

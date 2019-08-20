@@ -1,12 +1,25 @@
 ﻿
 @{
+    Layout = "~/Views/Shared/_BasicLayout.cshtml";
     ViewBag.Title = "Controls";
 }
-<link href="~/Scripts/calibre/DataComps/cView-2.0.css" rel="stylesheet" />
+
 <h2>Controls</h2>
+<div id="controlsContainer"></div>
+<script>
+
+    var container = document.getElementById("controlsContainer")
+    var builder = new ControlBuilder();
+    builder.textBox({ name: "FirstName", required: true, abc : "xyz",class: 'form-control',validation: {abc : "xyz", message : "a message", maxlength: 10} }).appendTo(container);
+    builder.hidden({ validation: {abc : "xyz", message : "a message"}}).appendTo(container);
+    builder.checkBox().appendTo(container);
+    builder.radio().appendTo(container);
+    builder.select({ Options: [{ 'value': 'a', 'text': 'abcd' }], EmptyOption: { value: 2, text: 'Select 2' }}).appendTo(container);
+    
+</script>
 
 
 @section scripts
 {
-    <script src="~/Scripts/calibre/DataComps/cFormControls-2.0.js"></script>
+
 }

@@ -2,8 +2,28 @@
  * cFormControls
  * Calibre Technologies
  * Tejasvi Hegde
+ * In Plain Vanilla JS, Does not require any other dependant library i.e. jQuery
  * */
 "use strict";
+
+class ControlBuilder {
+
+    textBox(controlDef) {
+        return new cTextControl(controlDef);
+    }
+    hidden(controlDef) {
+        return new cHiddenControl(controlDef);
+    }
+    checkBox(controlDef) {
+        return new cCheckBoxControl(controlDef);
+    }
+    radio(controlDef) {
+        return new cRadioControl(controlDef);
+    }
+    select(controlDef) {
+        return new cSelectControl(controlDef);
+    }
+}
 
 class cBaseControl {
 
@@ -12,20 +32,23 @@ class cBaseControl {
     IsInlineClosure: boolean = true;
     PropertyMap: any = {};
     ValidationPropertyMap: any = { message: 'data-msg' };
+    
     Properties: any = {};
     PropertiesToIgnore: string[] = ['dataType'];
+    PropertyGroupHandlers = { 'validation': this.PrepareValidationProperties}
+
     //private _value: any = null;
     //private _html: string = '';
+
     Element: any;
     constructor(controlTag: string, controlDef: any) {
         this.ControlTag = controlTag;
         if ((controlDef != null) && (controlDef != undefined))
             this.ControlDef = controlDef;
-
-        this.PrepareProperties();
+        this.Element = document.createElement(this.ControlTag);
+        this.PrepareProperties( null, this.ControlDef);
         this.Build();
-        //this.BuildHtmlObject();
-        //this.BuildHtml();
+
     }
     Build(value: any = null, index: number = null, attribs: any = null, prefix: string = null, suffix: string = null) {
         this.BuildHtmlObject(value, index, attribs, prefix, suffix);
@@ -44,99 +67,47 @@ class cBaseControl {
         this.Element.setAttribute('value', value);
         //this.Element.value = value;
     }
+    appendTo(parentElem) {
+        if (parentElem == null) return;
+        if (typeof parentElem === 'string') {
+            var _parent = document.getElementById(parentElem);
+            _parent.appendChild(this.Element);
+        }
+        else {
+            parentElem.appendChild(this.Element);
+        }
+        return this;
+    }
     GetElementContent(value, index, attribs, prefix, suffix) {
         return null;
     }
     PrepareAdditionalProperties() {
         
     }
-    /*
-    BuildHtml(value: any = null, index: number = null, attribs: any = null, prefix: string = null, suffix: string = null): string {
-        let attribHtml: string = '';
-
-        Object.getOwnPropertyNames(this.Properties).forEach(
-            function (val, idx, array) {
-                //prepare names and ids based on supplied params
-                let attribVal: string = (typeof this.Properties[val] === 'string' ? this.Properties[val].replace("\"", "'") : this.Properties[val]);
-                switch (val) {
-                    case 'name': {
-                        if (index != null) {
-                            if (prefix != null) {
-                                attribVal = prefix + '[' + index + '].' + attribVal;
-                            }
-                            else
-                                attribVal = attribVal + '[' + index + ']';
-                        }
-                        if (prefix != null) {
-                            if (index == null)
-                                attribVal = prefix + '.' + attribVal;
-                        }
-                        if (suffix != null) {
-                            attribVal = attribVal + '.' + suffix;
-                        }
-                    }
-                        break;
-                    case 'id': {
-                        if (index != null) {
-                            if (prefix != null) {
-                                attribVal = prefix + '_' + index + '__' + attribVal;
-                            }
-                            else
-                                attribVal = attribVal + '_' + index;
-                        }
-                        if (prefix != null) {
-                            if (index == null)
-                                attribVal = prefix + '_' + attribVal;
-                        }
-                        if (suffix != null) {
-                            attribVal = attribVal + '_' + suffix;
-                        }
-                    }
-                        break;
-                    case 'value': {
-                        if (value != null) {
-                            attribVal = value;
-                        }
-                    }
-                        break;
-                }
-                if (attribVal != null)
-                    attribHtml += val + '="' + attribVal + '" ';
-
-            }, this);
-        //Additional attribs
-        if (attribs != null) {
-            Object.getOwnPropertyNames(attribs).forEach(
-                function (val, idx, array) {
-                    //prepare names and ids based on supplied params
-                    let attribVal: string = (typeof attribs[val] === 'string' ? attribs[val].replace("\"", "'") : attribs[val]);
-                    attribHtml += val + '="' + attribVal + '" ';
-                }, this);
-        }
-
-
-        if ((this.Properties['value'] == null) && (value != null)) {
-            attribHtml += 'value="' + value + '" ';
-        }
-
-        var elemContent = this.GetElementContent(value, index, attribs, prefix, suffix);
-        if (elemContent != null) {
-            this.IsInlineClosure = false;
-        }
-        if (this.IsInlineClosure) {
-            this._html = '<' + this.ControlTag + ' ' + attribHtml + '/>';
-        }
-        else
-            this._html = '<' + this.ControlTag + ' ' + attribHtml + '>' + (elemContent != null ? elemContent : '') + '</' + this.ControlTag + '>';
-
-        return this.Html;
+    addClass(className) {
+        this.Element.classList.add(className);
+        return this;
     }
-    */
+    containsClass(className) {
+        return this.Element.classList.contains(className);
+    }
+    removeClass(className) {
+        this.Element.classList.remove(className);
+        return this;
+    }
+    setAttribute(name,value) {
+        this.Element.setAttribute(name, value);
+        return this;
+    }
+    removeAttribute(name) {
+        this.Element.removeAttribute(name);
+        return this;
+    }
+    hasAttribute(name) {
+        return this.Element.hasAttribute(name);
+    }
+    
     BuildHtmlObject(value: any = null, index: number = null, attribs: any = null, prefix: string = null, suffix: string = null) {
-        //let html: string = this.BuildHtml(value, index, attribs, prefix, suffix);
-        
-        this.Element = document.createElement(this.ControlTag);
-
         Object.getOwnPropertyNames(this.Properties).forEach(
             function (val, idx, array) {
                 //prepare names and ids based on supplied params
@@ -185,7 +156,7 @@ class cBaseControl {
                 }
 
                 if (attribVal != null)
-                    this.Element.setAttribute(val, attribVal);
+                    this.setAttribute(val, attribVal);
 
             }, this);
 
@@ -195,15 +166,14 @@ class cBaseControl {
                     function (val, idx, array) {
                         //prepare names and ids based on supplied params
                         let attribVal: any = (typeof attribs[val] === 'string' ? attribs[val].replace("\"", "'") : attribs[val]);
-                        this.Element.setAttribute(val, attribVal);
+                        this.setAttribute(val, attribVal);
 
                     }, this);
             }
 
 
         if (value != null) {
-            this.Element.setAttribute('value', value);
-            //this.Element.value = value;
+            this.setAttribute('value', value);
         }
         
 
@@ -215,58 +185,60 @@ class cBaseControl {
         return this.Element;
     }
     
-    PrepareProperties() {
-        this.Properties = {};
-
+    PrepareProperties(propGroupName,props) {
 
         /*Prepare Properties*/
-        Object.getOwnPropertyNames(this.ControlDef).forEach(
-            function (val, idx, array) {
-                if (this.PropertiesToIgnore.indexOf(val) >= 0)
+        Object.getOwnPropertyNames(props).forEach(
+            function (_key, idx, array) {
+                if (this.PropertiesToIgnore.indexOf(_key) >= 0)
                     return;
-                if ((typeof this.ControlDef[val] === 'string') || (typeof this.ControlDef[val] === 'boolean') || (typeof this.ControlDef[val] === 'number')) {
-                    let name: string = this.PropertyMap[val] || val;
-                    this.Properties[name] = this.ControlDef[name];
+                let _propVal = this.ControlDef[_key];
+                if ((typeof _propVal === 'string') || (typeof _propVal === 'boolean') || (typeof _propVal === 'number')) {
+                    let name: string = this.PropertyMap[_key] || _key;
+                    this.Properties[(name ? name : _key)] = _propVal;
+                }
+                else if (IsObject(_propVal)) {
+                    //its object... collect values recursively
+                    if (this.PropertyGroupHandlers[_key]) {
+                        this.PropertyGroupHandlers[_key](this, _propVal);
+                    }
                 }
             }, this);
 
-        if (this.Properties['id'] == null)
-            this.Properties['id'] = this.Properties['name'];
+        
+        if (!this.hasAttribute('id') && this.Properties['name'])
+            this.setAttribute('id', this.Properties['name']);
 
-        /*Validation*/
-        var validation = this.ControlDef['validation'];
-        if (validation) {
-            this.Properties['required'] = 'required';
-            Object.getOwnPropertyNames(this.ValidationPropertyMap).forEach(
-                function (val, idx, array) {
-                    if (this.PropertiesToIgnore.indexOf('validation.' + val) >= 0)
-                        return;
-                    let name: string = this.ValidationPropertyMap[val];
-                    this.Properties[name] = validation[val];
-
-                }, this);
-        }
-
-        if (this.ControlDef.maxlength !== undefined) {
-            this.Properties['data-msg-maxlength'] = 'Maximum allowed is ' + this.ControlDef.maxlength + ' characters/digits';
-            this.Properties['data-rule-maxlength'] = this.ControlDef.maxlength;
-        }
-        if (this.ControlDef.minlength !== undefined) {
-            this.Properties['data-msg-minlength'] = 'Minimum required is ' + this.ControlDef.minlength + ' characters/digits';
-            this.Properties['data-rule-minlength'] = this.ControlDef.minlength;
-        }
-
-        //
         if (this.Properties['readonly'] !== undefined && this.Properties['readonly'] === false) {
-            delete this.Properties['readonly'];
+            this.removeAttribute('readonly');
         }
         if (this.Properties['disabled'] !== undefined && this.Properties['disabled'] === false) {
-            delete this.Properties['disabled'];
+            this.removeAttribute('disabled');
         }
 
         this.PrepareAdditionalProperties();
     }
+    PrepareValidationProperties(obj, props) {
+        //use obj instead of this
+        obj.setAttribute('required', 'required');
+        
+        Object.getOwnPropertyNames(props).forEach(
+            function (_key, idx, array) {
+                if (obj.PropertiesToIgnore.indexOf('validation.' + _key) >= 0)
+                    return;
+                let name: string = obj.ValidationPropertyMap[_key];
+                obj.setAttribute((name ? name : _key), props[_key]);
+            }, obj);
 
+        if (props.maxlength !== undefined) {
+            obj.setAttribute('data-msg-maxlength', 'Maximum allowed is ' + props.maxlength + ' characters/digits');
+            obj.setAttribute('data-rule-maxlength', props.maxlength);
+        }
+        if (props.minlength !== undefined) {
+            obj.setAttribute('data-msg-minlength', 'Minimum required is ' + props.minlength + ' characters/digits');
+            obj.setAttribute('data-rule-minlength', props.minlength);
+        }
+    }
 }
 
 class cHiddenControl extends cBaseControl {
@@ -309,47 +281,58 @@ class cSelectControl extends cBaseControl {
         this.PropertiesToIgnore.push('OptionsHtml');
         this.PropertiesToIgnore.push('value');
     }
-    GetElementContent(value, index, attribs, prefix, suffix) {
-
-        let optsHtml : string = '';
-
+    
+    PrepareAdditionalProperties() {
+        this.Properties['type'] = 'select';
+        this.BuildOptions();
+    };
+    BuildOptions() {
+        var value = this.Properties['value'];
+        var selValue = (value !== null && value !== undefined) ? value : "";
         if (this.ControlDef.EmptyOption != null) {
-            optsHtml += '<option value="">' + this.ControlDef.EmptyOption + '</option>';
+
+            var emptyOpt = this.ControlDef.EmptyOption;
+            let val : string = "";
+            let txt : string = "";
+            if (IsString(emptyOpt)) txt = emptyOpt;
+            if (IsObject(emptyOpt)) {
+                val = emptyOpt.value;
+                txt = emptyOpt.text;
+            }
+            this.Element.add(new Option(txt, val, (selValue == val), (selValue == val)));
         }
-        if (this.ControlDef.OptionsHtml) {
-            optsHtml += this.ControlDef.OptionsHtml;
-        }
-        var selValue = value;
-        if (this.ControlDef.options) {
-            if (typeof this.ControlDef.options === 'object') {
-                Object.getOwnPropertyNames(this.ControlDef.options).forEach(
+
+        if (this.ControlDef.Options) {
+            var options = this.ControlDef.Options;
+            if (IsObject(options)) {
+                Object.getOwnPropertyNames(options).forEach(
                     function (key, idx, array) {
-                        let text : string = this.Instance.ControlDef.options[key];
-                        let selected : string = (key == selValue) ? 'selected' : '';
-                        optsHtml += '<option value="' + key + '" ' + selected + '>' + text + '</option>';
+                        let text: string = options[key];
+                        let selected: boolean = (key == selValue);
+                        var opt = new Option(text, key, selected, selected);
+                        opt.setAttribute('data-index', '' + idx);
+                        this.Element.add(opt);
                     }, this
                 );
             }
+            else if (IsArray(options)) {
+                for (var i = 0; i < options.length; i++) {
+                    var item = options[i];
+                    var val = item['value'];
+                    let text: string = item['text'];
+                    let selected: boolean = (val == selValue);
 
+                    var opt = new Option(text, value, selected, selected);
+                    opt.setAttribute('data-index', '' + i);
+                    opt.setAttribute('data-data', JSON.stringify(item));
+                    this.Element.add(opt);
+                }
+            }
+            else {
+                this.Element.innerHTML = options;
+            }
         }
-        return optsHtml;
     }
-    PrepareAdditionalProperties() {
-        this.Properties['type'] = 'select';
-
-        let url : string = this.ControlDef.url;
-        let addnlCls : string = '';
-        if (url) {
-            addnlCls += 'selectpicker-ajax  selectpicker-live';
-            this.Properties['data-abs-ajax-url'] = url;
-        }
-
-        if (this.Properties['class'] == null) {
-            this.Properties['class'] = '';
-        }
-        this.Properties['class'] += ' ' + addnlCls;
-
-    };
 }
 
 class cTextControl extends cBaseControl {
@@ -358,52 +341,53 @@ class cTextControl extends cBaseControl {
         super('input', controlDef);
         this.PropertiesToIgnore.push('selectOnFocus');
     }
+    getDataType() {
+        if (EndsWith(name, 'Date') || EndsWith(name, 'On')) {
+            return 'date';
+        }
+        if ((EndsWith(name, 'Amount')) || (EndsWith(name, 'Amt')) || (EndsWith(name, 'Rate')) || (EndsWith(name, 'Perc'))) {
+            return 'decimal';
+        }
+        if (EndsWith(name, 'Time') || EndsWith(name, 'At')) {
+            return 'clock';
+        }
+        if ((EndsWith(name, 'Quantity')) || (EndsWith(name, 'Qty'))) {
+            return 'integer';
+        }
+    }
     PrepareAdditionalProperties() {
         let dataType : string = this.ControlDef.dataType;
         if (dataType === undefined) {
-            if (EndsWith(name, 'Date') || EndsWith(name, 'On')) {
-                dataType = 'date';
-            }
-            if ((EndsWith(name, 'Amount')) || (EndsWith(name, 'Amt')) || (EndsWith(name, 'Rate')) || (EndsWith(name, 'Perc'))) {
-                dataType = 'decimal';
-            }
-            if (EndsWith(name, 'Time')) {
-                dataType = 'clock';
-            }
-            if ((EndsWith(name, 'Quantity')) || (EndsWith(name, 'Qty'))) {
-                dataType = 'integer';
-            }
-            //
+            dataType = this.getDataType();
         }
-        let dataClass : string = '';
         switch (dataType) {
             case 'integer':
             case 'int':
-                dataClass = 'integer';
-                this.Properties['required'] = 'required';
-                this.Properties['data-msg-digits'] = 'Please enter non decimal number';
-                this.Properties['data-rule-digits'] = 'true';
+                this.addClass('dataclass-integer');
+                //needed? or provide option?
+                //this.addAttribute('required', 'required');
+                //this.Properties['required'] = 'required';
+                //this.Properties['data-msg-digits'] = 'Please enter non decimal number';
+                //this.Properties['data-rule-digits'] = 'true';
                 break;
             case 'decimal':
-                dataClass = 'decimal';
-                this.Properties['required'] = 'required';
-                this.Properties['data-msg-number'] = 'Please enter non decimal number';
-                this.Properties['data-rule-number'] = 'true';
+                this.addClass('dataclass-decimal');
+                //this.Properties['required'] = 'required';
+                //this.Properties['data-msg-number'] = 'Please enter non decimal number';
+                //this.Properties['data-rule-number'] = 'true';
                 break;
             case 'date':
-                dataClass = 'datepicker';
-
+                this.addClass('dataclass-datepicker');
                 break;
             case 'clock':
-                dataClass = 'clockpicker';
+                this.addClass('dataclass-clockpicker');
                 break;
         }
         if (this.ControlDef.selectOnFocus === undefined || this.ControlDef.selectOnFocus !== false) {
-            dataClass += ' select-on-focus';
+            this.addClass('select-on-focus');
         }
-        if (this.Properties['class'] == null) {
-            this.Properties['class'] = '';
-        }
-        this.Properties['class'] += ' ' + dataClass;
+        
+        
+        
     }
 }
