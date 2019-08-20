@@ -23,6 +23,10 @@ class ControlBuilder {
     select(controlDef) {
         return new cSelectControl(controlDef);
     }
+    textArea(controlDef) {
+        return new cTextAreaControl(controlDef);
+    }
+    
 }
 
 class cBaseControl {
@@ -270,7 +274,15 @@ class cRadioControl extends cBaseControl {
         this.Properties['type'] = 'radio';
     }
 }
+class cTextAreaControl extends cBaseControl {
 
+    constructor(controlDef: any) {
+        super('textarea', controlDef);
+    }
+    PrepareAdditionalProperties() {
+        
+    }
+}
 class cSelectControl extends cBaseControl {
 
     constructor(controlDef: any) {
