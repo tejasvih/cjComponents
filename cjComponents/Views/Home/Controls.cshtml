@@ -16,6 +16,76 @@
     builder.radio().appendTo(container);
     builder.select({ Options: [{ 'value': 'a', 'text': 'abcd' }], EmptyOption: { value: 2, text: 'Select 2' }}).appendTo(container);
     builder.textArea().appendTo(container);
+
+    var idText = builder.textBox({value: 'idText'});
+    var controlDef =
+    {
+        options: {},
+        rows: [
+            {
+                options: {},
+                columns: [
+                    {
+                        options: {},
+                        controls: [
+                            builder.checkBox(),
+                            idText //can use instance variable 
+                        ]
+                    },
+                    {
+                        //if its direct control, can also specify single control
+                        controls: builder.select()
+                    },
+                    {
+                        options: {},
+                        controls: [
+                            builder.radio(),
+                            builder.textBox(),
+                            idText //reusing same control will move the control from earlier position to here!!! only one instance variables are possible
+                        ]
+                    }
+                ]
+            },
+            {
+                options: {},
+                columns: [
+                    {
+                        options: {},
+                        //single control can be added
+                        control: builder.textArea()
+                        
+                    },
+                    {
+                        options: {},
+                        //both can be added. but first control is added then controls
+                        control: builder.textArea(),
+                        controls: [
+                            builder.select()
+                        ]
+                    },
+                    {
+                        options: {},
+                        controls: [
+                            builder.radio(),
+                            builder.textBox()
+                        ]
+                    }
+                ]
+            },
+            {
+                //shortcut.. creates column for each control and adds control in that column
+                columns: [
+                            builder.checkBox(),
+                            builder.select(),
+                            builder.radio(),
+                            builder.textBox()
+                        ]
+            },
+        ]
+    }
+    var layout = new cLayout(controlDef);
+    layout.appendTo(container);
+
 </script>
 
 

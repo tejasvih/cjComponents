@@ -26,11 +26,13 @@ class ControlBuilder {
     textArea(controlDef) {
         return new cTextAreaControl(controlDef);
     }
-    
+    //TODO
+    //Label, raw html
+    //icon
 }
 
 class cBaseControl {
-
+    __ClassName: string = 'cBaseControl';
     ControlTag: string;
     ControlDef: any = {};
     IsInlineClosure: boolean = true;
@@ -72,14 +74,11 @@ class cBaseControl {
         //this.Element.value = value;
     }
     appendTo(parentElem) {
-        if (parentElem == null) return;
-        if (typeof parentElem === 'string') {
-            var _parent = document.getElementById(parentElem);
-            _parent.appendChild(this.Element);
-        }
-        else {
-            parentElem.appendChild(this.Element);
-        }
+        cUtils.appendTo(parentElem, this.Element);
+        return this;
+    }
+    writeTo(parentElem) {
+        cUtils.writeTo(parentElem, this.Element);
         return this;
     }
     GetElementContent(value, index, attribs, prefix, suffix) {
@@ -89,26 +88,32 @@ class cBaseControl {
         
     }
     addClass(className) {
-        this.Element.classList.add(className);
+        cUtils.addClass(this.Element, className);
+        //this.Element.classList.add(className);
         return this;
     }
     containsClass(className) {
-        return this.Element.classList.contains(className);
+        return cUtils.containsClass(this.Element, className);
+        //return this.Element.classList.contains(className);
     }
     removeClass(className) {
-        this.Element.classList.remove(className);
+        cUtils.removeClass(this.Element, className);
+        //this.Element.classList.remove(className);
         return this;
     }
-    setAttribute(name,value) {
-        this.Element.setAttribute(name, value);
+    setAttribute(name, value) {
+        cUtils.setAttribute(this.Element, name, value);
+        //this.Element.setAttribute(name, value);
         return this;
     }
     removeAttribute(name) {
-        this.Element.removeAttribute(name);
+        cUtils.removeAttribute(this.Element, name);
+        //this.Element.removeAttribute(name);
         return this;
     }
     hasAttribute(name) {
-        return this.Element.hasAttribute(name);
+        return cUtils.hasAttribute(this.Element, name);
+        //return this.Element.hasAttribute(name);
     }
     
     BuildHtmlObject(value: any = null, index: number = null, attribs: any = null, prefix: string = null, suffix: string = null) {
@@ -201,7 +206,7 @@ class cBaseControl {
                     let name: string = this.PropertyMap[_key] || _key;
                     this.Properties[(name ? name : _key)] = _propVal;
                 }
-                else if (IsObject(_propVal)) {
+                else if (cUtils.IsObject(_propVal)) {
                     //its object... collect values recursively
                     if (this.PropertyGroupHandlers[_key]) {
                         this.PropertyGroupHandlers[_key](this, _propVal);
@@ -306,8 +311,8 @@ class cSelectControl extends cBaseControl {
             var emptyOpt = this.ControlDef.EmptyOption;
             let val : string = "";
             let txt : string = "";
-            if (IsString(emptyOpt)) txt = emptyOpt;
-            if (IsObject(emptyOpt)) {
+            if (cUtils.IsString(emptyOpt)) txt = emptyOpt;
+            if (cUtils.IsObject(emptyOpt)) {
                 val = emptyOpt.value;
                 txt = emptyOpt.text;
             }
@@ -316,7 +321,7 @@ class cSelectControl extends cBaseControl {
 
         if (this.ControlDef.Options) {
             var options = this.ControlDef.Options;
-            if (IsObject(options)) {
+            if (cUtils.IsObject(options)) {
                 Object.getOwnPropertyNames(options).forEach(
                     function (key, idx, array) {
                         let text: string = options[key];
@@ -327,7 +332,7 @@ class cSelectControl extends cBaseControl {
                     }, this
                 );
             }
-            else if (IsArray(options)) {
+            else if (cUtils.IsArray(options)) {
                 for (var i = 0; i < options.length; i++) {
                     var item = options[i];
                     var val = item['value'];
@@ -354,16 +359,16 @@ class cTextControl extends cBaseControl {
         this.PropertiesToIgnore.push('selectOnFocus');
     }
     getDataType() {
-        if (EndsWith(name, 'Date') || EndsWith(name, 'On')) {
+        if (cUtils.EndsWith(name, 'Date') || cUtils.EndsWith(name, 'On')) {
             return 'date';
         }
-        if ((EndsWith(name, 'Amount')) || (EndsWith(name, 'Amt')) || (EndsWith(name, 'Rate')) || (EndsWith(name, 'Perc'))) {
+        if ((cUtils.EndsWith(name, 'Amount')) || (cUtils.EndsWith(name, 'Amt')) || (cUtils.EndsWith(name, 'Rate')) || (cUtils.EndsWith(name, 'Perc'))) {
             return 'decimal';
         }
-        if (EndsWith(name, 'Time') || EndsWith(name, 'At')) {
+        if (cUtils.EndsWith(name, 'Time') || cUtils.EndsWith(name, 'At')) {
             return 'clock';
         }
-        if ((EndsWith(name, 'Quantity')) || (EndsWith(name, 'Qty'))) {
+        if ((cUtils.EndsWith(name, 'Quantity')) || (cUtils.EndsWith(name, 'Qty'))) {
             return 'integer';
         }
     }

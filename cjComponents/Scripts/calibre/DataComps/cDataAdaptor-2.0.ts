@@ -37,7 +37,7 @@ class cDataAdaptor {
 
     constructor(dataSource: any,columnNames : string[]) {
         
-        if (isFunction(dataSource)) {
+        if (cUtils.isFunction(dataSource)) {
             this.OnGetData = dataSource;
             this.IsRemoteData = true;
         }
@@ -111,7 +111,7 @@ class cDataAdaptor {
         this.CurrentPage = 1;
         let data : any;
 
-        if (isFunction(dataSource)) {
+        if (cUtils.isFunction(dataSource)) {
             this.OnGetData = dataSource;
             data = this.OnGetData(this.CurrentPage, this.PageSize, this.SortedColumnName, this.SortOrder);
         }
@@ -173,7 +173,7 @@ class cDataAdaptor {
                 let AjaxObj = new cAjax(conf);
                 
 
-                if (!isFunction(postData)) {
+                if (!cUtils.isFunction(postData)) {
                     postData = postData || {};
                     postData.start = startIndex;
                     postData.length = pageSize;

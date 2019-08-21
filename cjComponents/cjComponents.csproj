@@ -172,6 +172,7 @@
     <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="Scripts\calibre\DataComps\cDataAdaptor-2.0.js" />
     <Content Include="Scripts\calibre\DataComps\cFormControls-2.0.js" />
+    <Content Include="Scripts\calibre\DataComps\cLayout-2.0.js" />
     <Content Include="Scripts\calibre\DataComps\cUtils-2.0.js" />
     <Content Include="Scripts\calibre\DataComps\cView-2.0.js" />
     <Content Include="Scripts\esm\popper-utils.js" />
@@ -201,14 +202,12 @@
     <Content Include="Content\material-icons\MaterialIcons-Regular.ttf" />
     <Content Include="Content\material-icons\MaterialIcons-Regular.woff" />
     <Content Include="Content\material-icons\MaterialIcons-Regular.woff2" />
+    <Content Include="Scripts\calibre\DataComps\cLayout-2.0.js.map" />
     <None Include="Scripts\jquery-3.3.1.intellisense.js" />
     <Content Include="Scripts\calibre\Common.js" />
     <Content Include="Scripts\calibre\dal.js" />
     <Content Include="Scripts\calibre\DALPostHandler.js" />
-    <Content Include="Scripts\calibre\DataComps\cDataAdaptor.js" />
-    <Content Include="Scripts\calibre\DataComps\cForm.js" />
     <Content Include="Scripts\calibre\DataComps\cView-2.0.css" />
-    <Content Include="Scripts\calibre\DataComps\cView.js" />
     <Content Include="Scripts\calibre\desktop.js" />
     <Content Include="Scripts\calibre\FormBuider.js" />
     <Content Include="Scripts\calibre\FormKeyNavigator.js" />
@@ -274,6 +273,8 @@
   <ItemGroup>
     <TypeScriptCompile Include="Scripts\calibre\DataComps\cDataAdaptor-2.0.ts" />
     <TypeScriptCompile Include="Scripts\calibre\DataComps\cFormControls-2.0.ts" />
+    <TypeScriptCompile Include="Scripts\calibre\DataComps\cLayout-2.0.ts" />
+    <TypeScriptCompile Include="Scripts\calibre\DataComps\cAjax-2.0.ts" />
     <TypeScriptCompile Include="Scripts\calibre\DataComps\cUtils-2.0.ts" />
     <TypeScriptCompile Include="Scripts\calibre\DataComps\cView-2.0.ts" />
     <TypeScriptCompile Include="Scripts\index.d.ts" />

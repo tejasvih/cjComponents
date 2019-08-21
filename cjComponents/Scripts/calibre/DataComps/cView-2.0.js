@@ -96,9 +96,9 @@ class cView {
         this.Render();
     }
     BuildPager(container) {
-        let pagerElement = GetElement('nav');
+        let pagerElement = cUtils.GetElement('nav');
         container.appendChild(pagerElement);
-        let ul = GetElement('ul', 'pagination pull-right');
+        let ul = cUtils.GetElement('ul', 'pagination pull-right');
         pagerElement.appendChild(ul);
         let s = this.Adaptor.CurrentPage === 1 ? ' disabled ' : '';
         let li = this.getPagingItem("first", 'First', s, ' first ' + s);
@@ -119,10 +119,10 @@ class cView {
         ul.appendChild(li);
     }
     getPagingItem(val, title, itemcls, linkcls) {
-        let li = GetElement('li', 'page-item ' + itemcls);
+        let li = cUtils.GetElement('li', 'page-item ' + itemcls);
         //let a = GetElement('a', 'page-link first' + s, null, { "href": "javascript:void(0)", "data-pagenumber": "first" });
         //let a = GetElement('a', 'page-link first' + s, null, { "href": "javascript:void(0)", "data": "pagenumber : 'first'" });
-        let a = GetElement('a', 'page-link ' + linkcls, null, { "href": "javascript:void(0)", "pagenumber": val }, title);
+        let a = cUtils.GetElement('a', 'page-link ' + linkcls, null, { "href": "javascript:void(0)", "pagenumber": val }, title);
         a.dataset.pagenumber = val;
         a.onclick = this.changePageEvent;
         //let span = GetElement('span', 'material-icons',null,null,this.pagerFirstClassName);//<i class="material-icons">description</i>
@@ -133,11 +133,11 @@ class cView {
     }
     addContentToElement(content, element) {
         if (content != null) {
-            if (IsObject(content)) {
+            if (cUtils.IsObject(content)) {
                 element.appendChild(content);
             }
             else {
-                let children = GetElementFromHTML(content);
+                let children = cUtils.GetElementFromHTML(content);
                 if (children != null)
                     while (children.length > 0) {
                         element.appendChild(children[0]);
@@ -169,11 +169,11 @@ class cGridView extends cView {
     }
     CreateHeader(container) {
         super.CreateHeader(container);
-        let headerElement = GetElement('div', 'row c-grid-header-row');
+        let headerElement = cUtils.GetElement('div', 'row c-grid-header-row');
         this.ColumnsDefs.forEach(function (col, i) {
             let title = (col.title != null) ? col.title : '';
             let sortSpan = null;
-            let headerColElement = GetElement('div', 'c-grid-cell ' + GetSizeClass(col.width), null, { "data-colindex": i });
+            let headerColElement = cUtils.GetElement('div', 'c-grid-cecUtils.ll ' + GetSizeClass(col.width), null, { "data-colindex": i });
             if ((col.name != null) && (col.name.trim() !== '')) {
                 if (col.sortable == null || col.sortable == true) {
                     headerColElement.className += ' sorted';
@@ -181,10 +181,10 @@ class cGridView extends cView {
                     headerColElement.onclick = this.changeSortEvent;
                 }
                 if (col.SortDirection === "asc") {
-                    sortSpan = GetElement('span', this.sortUpClassName + ' text-info', 'margin-left:4px;');
+                    sortSpan = cUtils.GetElement('span', this.sortUpClassName + ' text-info', 'margin-left:4px;');
                 }
                 else if (col.SortDirection === "desc") {
-                    sortSpan = GetElement('span', this.sortDownClassName + ' text-info', 'margin-left:4px;');
+                    sortSpan = cUtils.GetElement('span', this.sortDownClassName + ' text-info', 'margin-left:4px;');
                 }
             }
             let textNode = document.createTextNode(title);
@@ -201,7 +201,7 @@ class cGridView extends cView {
         super.CreateFooter(container);
         if (!this.IsFooterRequired)
             return null;
-        let footerElement = GetElement('div', 'row c-grid-footer-row');
+        let footerElement = cUtils.GetElement('div', 'row c-grid-footer-row');
         if (this.Footer) {
             let textNode = document.createTextNode(this.Footer);
             footerElement.appendChild(textNode);
@@ -217,7 +217,7 @@ class cGridView extends cView {
     ;
     CreateRecord(container, row, index) {
         super.CreateRecord(container, row, index);
-        let rowElement = GetElement('div', 'row c-grid-row');
+        let rowElement = cUtils.GetElement('div', 'row c-grid-row');
         this.ColumnsDefs.forEach(function (col, cIndex) {
             let content;
             if (col.render != null) {
@@ -227,7 +227,7 @@ class cGridView extends cView {
                 if ((col.name != null) && (col.name.trim() !== '') && (row[col.name] != null))
                     content = row[col.name];
             }
-            let colElement = GetElement('div', 'c-grid-cell ' + GetSizeClass(col.width));
+            let colElement = cUtils.GetElement('div', 'c-grid-cell ' + GetSizeClass(col.width));
             this.addContentToElement(content, colElement);
             rowElement.appendChild(colElement);
         }, this);
@@ -263,7 +263,7 @@ class cCardView extends cView {
         super.CreateFooter(container);
         if (!this.IsFooterRequired)
             return null;
-        let footerElement = GetElement('div', 'row card-grid-footer');
+        let footerElement = cUtils.GetElement('div', 'row card-grid-footer');
         if (this.Footer) {
             let textNode = document.createTextNode(this.Footer);
             footerElement.appendChild(textNode);
@@ -278,9 +278,9 @@ class cCardView extends cView {
     }
     CreateRecord(container, row, index) {
         super.CreateRecord(container, row, index);
-        let cardContainerElement = GetElement('div', GetSizeClass(this.cardSize));
+        let cardContainerElement = cUtils.GetElement('div', GetSizeClass(this.cardSize));
         container.appendChild(cardContainerElement);
-        let cardElement = GetElement('div', 'card');
+        let cardElement = cUtils.GetElement('div', 'card');
         cardContainerElement.appendChild(cardElement);
         if (this.OnGetCardHtml != null) {
             let content = this.OnGetCardHtml(row, index, this.cardTemplate);
@@ -313,10 +313,10 @@ class cTemplatedGridView extends cView {
     }
     CreateHeader(container) {
         super.CreateHeader(container);
-        let headerElement = GetElement('div', 'row c-grid-header-row');
+        let headerElement = cUtils.GetElement('div', 'row c-grid-header-row');
         this.ColumnsDefs.forEach(function (col, i) {
             let title = (col.title != null) ? col.title : '';
-            let headerColElement = GetElement('div', 'c-grid-cell ' + GetSizeClass(col.width), null, { "data-colindex": i });
+            let headerColElement = cUtils.GetElement('div', 'c-grid-cell ' + GetSizeClass(col.width), null, { "data-colindex": i });
             let textNode = document.createTextNode(title);
             headerColElement.appendChild(textNode);
             headerElement.appendChild(headerColElement);
@@ -326,7 +326,7 @@ class cTemplatedGridView extends cView {
     }
     CreateRecord(container, row, index) {
         super.CreateRecord(container, row, index);
-        let rowElement = GetElement('div', 'row c-grid-row');
+        let rowElement = cUtils.GetElement('div', 'row c-grid-row');
         this.ColumnsDefs.forEach(function (col, cIndex) {
             let content;
             if (col.render != null) {
@@ -336,7 +336,7 @@ class cTemplatedGridView extends cView {
                 if ((col.name != null) && (col.name.trim() !== '') && (row[col.name] != null))
                     content = row[col.name];
             }
-            let colElement = GetElement('div', 'c-grid-cell ' + GetSizeClass(col.width));
+            let colElement = cUtils.GetElement('div', 'c-grid-cell ' + GetSizeClass(col.width));
             this.addContentToElement(content, colElement);
             rowElement.appendChild(colElement);
         }, this);
