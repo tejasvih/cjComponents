@@ -137,11 +137,9 @@ class cView {
                 element.appendChild(content);
             }
             else {
-                let children = cUtils.GetElementFromHTML(content);
+                let children = cUtils.GetElementsFromHTML(content);
                 if (children != null)
-                    while (children.length > 0) {
-                        element.appendChild(children[0]);
-                    }
+                    element.appendChild(children);
             }
         }
     }

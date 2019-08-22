@@ -3,6 +3,7 @@
  * Calibre Technologies
  * Tejasvi Hegde
  * In Plain Vanilla JS, Does not require any other dependant library i.e. jQuery
+ * Status: Can run Beta test
  * */
 "use strict";
 class ControlBuilder {
@@ -24,6 +25,12 @@ class ControlBuilder {
     textArea(controlDef) {
         return new cTextAreaControl(controlDef);
     }
+    htmlControl(controlDef) {
+        return new cHtmlControl(controlDef);
+    }
+    staticControl(controlDef) {
+        return new cStaticControl(controlDef);
+    }
 }
 class cBaseControl {
     constructor(controlTag, controlDef) {
@@ -38,9 +45,20 @@ class cBaseControl {
         this.ControlTag = controlTag;
         if ((controlDef != null) && (controlDef != undefined))
             this.ControlDef = controlDef;
-        this.Element = document.createElement(this.ControlTag);
-        this.PrepareProperties(null, this.ControlDef);
-        this.Build();
+        if (!(this instanceof cHtmlControl)) {
+            this.Element = document.createElement(this.ControlTag);
+            this.PrepareProperties(null, this.ControlDef);
+            this.Build();
+        }
+        else {
+            this.Element = cUtils.GetElementsFromHTML(this.ControlDef.html);
+        }
+    }
+    getPropertiesToIgnore() {
+        return this.PropertiesToIgnore;
+    }
+    static isBaseControl(obj) {
+        return obj instanceof cBaseControl;
     }
     Build(value = null, index = null, attribs = null, prefix = null, suffix = null) {
         this.BuildHtmlObject(value, index, attribs, prefix, suffix);
@@ -55,9 +73,7 @@ class cBaseControl {
         return this.Element.value;
     }
     set Value(value) {
-        //this._value = value;
         this.Element.setAttribute('value', value);
-        //this.Element.value = value;
     }
     appendTo(parentElem) {
         cUtils.appendTo(parentElem, this.Element);
@@ -74,31 +90,25 @@ class cBaseControl {
     }
     addClass(className) {
         cUtils.addClass(this.Element, className);
-        //this.Element.classList.add(className);
         return this;
     }
     containsClass(className) {
         return cUtils.containsClass(this.Element, className);
-        //return this.Element.classList.contains(className);
     }
     removeClass(className) {
         cUtils.removeClass(this.Element, className);
-        //this.Element.classList.remove(className);
         return this;
     }
     setAttribute(name, value) {
         cUtils.setAttribute(this.Element, name, value);
-        //this.Element.setAttribute(name, value);
         return this;
     }
     removeAttribute(name) {
         cUtils.removeAttribute(this.Element, name);
-        //this.Element.removeAttribute(name);
         return this;
     }
     hasAttribute(name) {
         return cUtils.hasAttribute(this.Element, name);
-        //return this.Element.hasAttribute(name);
     }
     BuildHtmlObject(value = null, index = null, attribs = null, prefix = null, suffix = null) {
         Object.getOwnPropertyNames(this.Properties).forEach(function (val, idx, array) {
@@ -160,16 +170,23 @@ class cBaseControl {
                 this.setAttribute(val, attribVal);
             }, this);
         }
-        if (value != null) {
-            this.setAttribute('value', value);
-        }
+        this.onSetValue(value);
         var elemContent = this.GetElementContent(value, index, attribs, prefix, suffix);
         if (elemContent != null) {
             this.Element.innerHTML = elemContent;
         }
         return this.Element;
     }
+    onSetValue(value) {
+        if (value != null) {
+            this.setAttribute('value', value);
+        }
+    }
     PrepareProperties(propGroupName, props) {
+        let propsToIgnore = this.getPropertiesToIgnore();
+        if (propsToIgnore != null) {
+            this.PropertiesToIgnore = [...this.PropertiesToIgnore, ...propsToIgnore];
+        }
         /*Prepare Properties*/
         Object.getOwnPropertyNames(props).forEach(function (_key, idx, array) {
             if (this.PropertiesToIgnore.indexOf(_key) >= 0)
@@ -223,6 +240,25 @@ class cHiddenControl extends cBaseControl {
         this.Properties['type'] = 'hidden';
     }
 }
+class cHtmlControl extends cBaseControl {
+    constructor(controlDef) {
+        super('', controlDef);
+    }
+}
+class cStaticControl extends cBaseControl {
+    constructor(controlDef) {
+        super('span', controlDef);
+    }
+    getPropertiesToIgnore() {
+        return ['text', 'content', 'value'];
+    }
+    GetElementContent(value, index, attribs, prefix, suffix) {
+        return this.ControlDef.text || this.ControlDef.content || this.ControlDef.value;
+    }
+    onSetValue(value) {
+        //do nothing, just ignore
+    }
+}
 class cCheckBoxControl extends cBaseControl {
     constructor(controlDef) {
         super('input', controlDef);
@@ -249,10 +285,9 @@ class cTextAreaControl extends cBaseControl {
 class cSelectControl extends cBaseControl {
     constructor(controlDef) {
         super('select', controlDef);
-        this.PropertiesToIgnore.push('url');
-        this.PropertiesToIgnore.push('EmptyOption');
-        this.PropertiesToIgnore.push('OptionsHtml');
-        this.PropertiesToIgnore.push('value');
+    }
+    getPropertiesToIgnore() {
+        return ['url', 'EmptyOption', 'OptionsHtml', 'value'];
     }
     PrepareAdditionalProperties() {
         this.Properties['type'] = 'select';
@@ -306,7 +341,9 @@ class cSelectControl extends cBaseControl {
 class cTextControl extends cBaseControl {
     constructor(controlDef) {
         super('input', controlDef);
-        this.PropertiesToIgnore.push('selectOnFocus');
+    }
+    getPropertiesToIgnore() {
+        return ['selectOnFocus'];
     }
     getDataType() {
         if (cUtils.EndsWith(name, 'Date') || cUtils.EndsWith(name, 'On')) {

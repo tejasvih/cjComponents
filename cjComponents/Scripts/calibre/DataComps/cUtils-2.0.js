@@ -19,6 +19,7 @@ class cUtils {
     }
     static IsObject(obj) {
         return obj === Object(obj) && Object.prototype.toString.call(obj) !== '[object Array]';
+        //return (item && typeof item === 'object' && !Array.isArray(item));
     }
     static IsArray(obj) {
         return Array.isArray(obj);
@@ -38,6 +39,18 @@ class cUtils {
             return false;
         return (text.lastIndexOf(word) === diff);
     }
+    static copyIfNoExists(src, dest) {
+        Object.keys(src).forEach((key) => {
+            if (dest[key] == null) {
+                dest[key] = src[key];
+            }
+        }, this);
+    }
+    static copyEvenIfNoExists(src, dest) {
+        Object.keys(src).forEach((key) => {
+            dest[key] = src[key];
+        }, this);
+    }
     static GetElement(tag, cls = null, style = null, attribs = null, content = null) {
         let element = document.createElement(tag);
         if (cls) {
@@ -52,18 +65,21 @@ class cUtils {
             }, this);
         }
         if (content != null) {
-            let children = cUtils.GetElementFromHTML(content);
+            let children = cUtils.GetElementsFromHTML(content);
             if (children != null)
-                while (children.length > 0) {
-                    element.appendChild(children[0]);
+                for (var i = 0; i < children.length; i++) {
+                    element.appendChild(children[i]);
                 }
         }
         return element;
     }
-    static GetElementFromHTML(htmlString) {
-        let div = document.createElement('div');
+    static GetElementsFromHTML(htmlString) {
+        let template = document.createElement('template');
+        template.innerHTML = htmlString;
+        return template.content.childNodes;
+        /*let div = document.createElement('div');
         div.innerHTML = htmlString;
-        return div.childNodes;
+        return div.childNodes;*/
     }
     static appendTo(parentElem, childElem) {
         if (parentElem == null)
@@ -72,7 +88,14 @@ class cUtils {
         if (typeof parentElem === 'string') {
             _parent = document.getElementById(parentElem);
         }
-        _parent.appendChild(childElem);
+        if (cUtils.IsArray(childElem) || (childElem instanceof NodeList)) {
+            for (var i = 0; i < childElem.length; i++) {
+                _parent.appendChild(childElem[i]);
+            }
+        }
+        else {
+            _parent.appendChild(childElem);
+        }
     }
     static writeTo(parentElem, childElem) {
         if (parentElem == null)
@@ -87,22 +110,28 @@ class cUtils {
         cUtils.appendTo(_parent, childElem);
     }
     static addClass(elem, className) {
-        elem.classList.add(className);
+        if (className) {
+            let classes = className.split(' ');
+            elem.classList.add(...classes);
+        }
         return this;
     }
     static containsClass(elem, className) {
         return elem.classList.contains(className);
     }
     static removeClass(elem, className) {
-        elem.classList.remove(className);
+        if (className)
+            elem.classList.remove(className);
         return this;
     }
     static setAttribute(elem, name, value) {
-        elem.setAttribute(name, value);
+        if (name)
+            elem.setAttribute(name, value);
         return this;
     }
     static removeAttribute(elem, name) {
-        elem.removeAttribute(name);
+        if (name)
+            elem.removeAttribute(name);
         return this;
     }
     static hasAttribute(elem, name) {
