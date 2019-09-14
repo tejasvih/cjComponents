@@ -16,6 +16,9 @@ namespace cjComponents.Controllers
         {
             return View();
         }
-
+        public ActionResult MethodChaining()
+        {
+            return View();
+        }
     }
 }

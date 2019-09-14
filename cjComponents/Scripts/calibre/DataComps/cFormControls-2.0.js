@@ -4,11 +4,20 @@
  * Tejasvi Hegde
  * In Plain Vanilla JS, Does not require any other dependant library i.e. jQuery
  * Status: Can run Beta test
+ *
+ * TODO: attach data to control using data : { name: value ... }
+ * LabelFor control
+ * icon prefix/suffix
+ *
+ *
  * */
 "use strict";
 class ControlBuilder {
     textBox(controlDef) {
         return new cTextControl(controlDef);
+    }
+    password(controlDef) {
+        return new cPasswordControl(controlDef);
     }
     hidden(controlDef) {
         return new cHiddenControl(controlDef);
@@ -367,7 +376,7 @@ class cTextControl extends cBaseControl {
         switch (dataType) {
             case 'integer':
             case 'int':
-                this.addClass('dataclass-integer');
+                this.addClass('integer'); //dataclass-
                 //needed? or provide option?
                 //this.addAttribute('required', 'required');
                 //this.Properties['required'] = 'required';
@@ -375,21 +384,37 @@ class cTextControl extends cBaseControl {
                 //this.Properties['data-rule-digits'] = 'true';
                 break;
             case 'decimal':
-                this.addClass('dataclass-decimal');
+                this.addClass('decimal');
                 //this.Properties['required'] = 'required';
                 //this.Properties['data-msg-number'] = 'Please enter non decimal number';
                 //this.Properties['data-rule-number'] = 'true';
                 break;
             case 'date':
-                this.addClass('dataclass-datepicker');
+                this.addClass('datepicker');
                 break;
             case 'clock':
-                this.addClass('dataclass-clockpicker');
+                this.addClass('clockpicker');
                 break;
         }
         if (this.ControlDef.selectOnFocus === undefined || this.ControlDef.selectOnFocus !== false) {
             this.addClass('select-on-focus');
         }
+    }
+}
+class cPasswordControl extends cBaseControl {
+    constructor(controlDef) {
+        super('input', controlDef);
+    }
+    PrepareAdditionalProperties() {
+        this.Properties['type'] = 'password';
+    }
+    getPropertiesToIgnore() {
+        return ['selectOnFocus'];
+    }
+}
+class cButtonControl extends cBaseControl {
+    constructor(controlDef) {
+        super('button', controlDef);
     }
 }
 //# sourceMappingURL=cFormControls-2.0.js.map

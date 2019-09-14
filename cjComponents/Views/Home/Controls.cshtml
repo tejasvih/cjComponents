@@ -22,6 +22,8 @@
 
 <h2>Controls</h2>
 <div id="controlsContainer"></div>
+<hr /><hr />
+<div id="controlsContainer2"></div>
 <script>
 
     var container = document.getElementById("controlsContainer")
@@ -35,13 +37,14 @@
     
     builder.textBox({ name: "FirstName",value : 'Tejasvi Hegde', required: true, abc: "xyz", class: 'form-control', validation: { abc: "xyz", message: "a message", maxlength: 10 } }).appendTo(container);
     builder.hidden({ validation: { abc: "xyz", message: "a message" } }).appendTo(container);
+    builder.password({ validation: { abc: "xyz", message: "a message" } }).appendTo(container);
     builder.checkBox({checked : ""}).appendTo(container);
     builder.radio({}).appendTo(container);
     builder.select({class: 'form-control', Options: [{ 'value': 'a', 'text': 'abcd' }], EmptyOption: { value: 2, text: 'Select 2' } }).appendTo(container);
     builder.textArea({class: 'form-control'}).appendTo(container);
 
     
-    var idText = builder.textBox({ value: 'idText' });
+    var idText = new cTextControl({ value: 'idText' });//builder.textBox({ value: 'idText' });
 
     var row1 = {
         options: {
@@ -114,7 +117,87 @@
     layout.appendTo(container);
 
 </script>
+<script>
+    //form builder
+var _schema = {
+        Gid: { type: 'hidden', config: { directControl: true } },
+        CustomerId: {
+            required: true,
+            options: {},
+            config:  { w: 5, isNewRow: true },
+            onchange:" CustomerChange(this);",
+        },
 
+       
+        OrderNo: { config: { isNewRow: true, w: 3 } },
+        OrderDate: { config: { lo: 1, lw: 2, w: 2 } },
+     
+       
+        PrimaryContactPerson: { config: { isNewRow: true, w: 5 } },
+     
+      
+        
+
+       
+        ItemsTotalAmountLbl: { type: 'static', title: 'Items Total Amount', class: 'text-number text-bold', config: { lo: 8, lw: 2, w: 2, isNewRow: true }, value: '{{masterData.ItemsTotalAmount | toCurrency}}' },
+
+        DiscountPerc: {
+            dataType: 'decimal', config: { isNewRow: true, lo: 5, lw: 2, w: 1, showHelpText: false }, props: {
+                'v-model': "masterData.DiscountPerc"
+            }
+        },
+        DiscountAmountLbl: { type: 'static', class: 'text-number text-bold', label: { title: 'Discount Rs.' }, config: { lw: 2, w: 2 }, value: '{{masterData.DiscountAmount | toCurrency}}' },
+        TaxableAmountLbl: { type: 'static', title: 'Taxable Amount', class: 'text-number text-bold', config: { lo: 8, lw: 2, w: 2, isNewRow: true }, value: '{{masterData.TaxableAmount | toCurrency}}' },
+        CGSTPerc: { dataType: 'decimal', config: { isNewRow: true, lo: 5, lw: 2, w: 1, showHelpText: false }, props: { 'v-model': "masterData.CGSTPerc" } },
+        CGSTAmountLbl: { type: 'static', title: 'CGST Amount', class: 'text-number text-bold', label: { title: 'CGST Rs.' }, config: { lw: 2, w: 2 }, value: '{{masterData.CGSTAmount | toCurrency}}' },
+
+        SGSTPerc: { dataType: 'decimal', config: { isNewRow: true, lo: 5, lw: 2, w: 1, showHelpText: false }, props: { 'v-model': "masterData.SGSTPerc" } },
+        SGSTAmountLbl: { type: 'static', title: 'SGST Amount', class: 'text-number text-bold', label: { title: 'SGST Rs.' }, config: { lw: 2, w: 2 }, value: '{{masterData.SGSTAmount | toCurrency}}' },
+
+        IGSTPerc: { dataType: 'decimal', config: { isNewRow: true, lo: 5, lw: 2, w: 1, showHelpText: false }, props: { 'v-model': "masterData.IGSTPerc" } },
+        IGSTAmountLbl: { type: 'static', title: 'IGST Amount', class: 'text-number text-bold', label: { title: 'IGST Rs.' }, config: { lw: 2, w: 2 }, value: '{{masterData.IGSTAmount | toCurrency}}' },
+
+
+        TotalAmountLbl: { type: 'static', title: 'Total Amount', class: 'text-number text-bold', config: { isNewRow: true, lo: 8, lw: 2, w: 2 }, value: '{{masterData.TotalAmount | toCurrency}}' },
+        RoundedOffLbl: { type: 'static', title: 'Rounded Off', class: 'text-number text-bold', config: { isNewRow: true, lo: 8, lw: 2, w: 2 }, value: '{{masterData.RoundedOff | toCurrency}}' },
+        GrandTotalAmountLbl: { type: 'static', title: 'Grand Total Amount', class: 'text-number text-bold', config: { isNewRow: true, lo: 8, lw: 2, w: 2 }, value: '{{masterData.GrandTotalAmount | toCurrency}}' },
+
+
+        ItemsTotalAmount: { type: 'hidden', config: { directControl: true }, props: { ':value': "masterData.ItemsTotalAmount" } },
+        DiscountAmount: { type: 'hidden', config: { directControl: true }, props: { ':value': "masterData.DiscountAmount" } },
+        TaxableAmount: { type: 'hidden', config: { directControl: true }, props: { ':value': "masterData.TaxableAmount" } },
+        CGSTAmount: { type: 'hidden', config: { directControl: true }, props: { ':value': "masterData.CGSTAmount" } },
+        SGSTAmount: { type: 'hidden', config: { directControl: true }, props: { ':value': "masterData.SGSTAmount" } },
+        IGSTAmount: { type: 'hidden', config: { directControl: true }, props: { ':value': "masterData.IGSTAmount" } },
+        TotalAmount: { type: 'hidden', config: { directControl: true }, props: { ':value': "masterData.TotalAmount" } },
+        RoundedOff: { type: 'hidden', config: { directControl: true }, props: { ':value': "masterData.RoundedOff" } },
+        GrandTotalAmount: { type: 'hidden', config: { directControl: true }, props: { ':value': "masterData.GrandTotalAmount" } },
+        theHR: { type: 'html', noLabel: true, config: { lw: 0, o: 0, w: 12, isNewRow: true, noLabel: true }, content: '<hr/>' },
+
+        Notes: { type: 'textarea', rows: 3, config: { lw: 1, w: 11, isNewRow: true } },
+        IsCancelled: { type: 'checkbox', config: { o: 0, lo: 0, lw: 2, w: 1, isNewRow: true } },
+        __footNote: { type: 'static', offset: { md: 3 }, class: 'category form-category', text: '<small>*</small> Required fields', config: { isNewRow: true, directControl: true, w: 7 } }
+    };
+    var _values = {};
+    if (_values.CGSTPerc === undefined) {
+        _values.CGSTPerc = 9;
+    }
+    if (_values.SGSTPerc === undefined) {
+        _values.SGSTPerc = 9;
+    }
+   
+    var formDef = {
+        schema: _schema,
+        values: _values,
+        options: { vue: {} }
+    }
+    //var fb = new FormBuilder(formDef);
+    //fb.WriteControls(['Gid', 'CustomerId', 'SalesPersonId',"GodownId", 'OrderNo', 'OrderDate', 'PhoneNumber', 'Name', 'PhoneNumber', 'PINCode', 'Email','PrimaryContactPerson','__footNote']);
+
+
+    var fbuilder = new cFormBuilder(formDef);
+    fbuilder.WriteControlsTo('controlsContainer2');
+</script>
 
 @section scripts
 {

@@ -171,6 +171,7 @@
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="Scripts\calibre\DataComps\cDataAdaptor-2.0.js" />
+    <Content Include="Scripts\calibre\DataComps\cFormBuilder-2.0.js" />
     <Content Include="Scripts\calibre\DataComps\cFormControls-2.0.js" />
     <Content Include="Scripts\calibre\DataComps\cLayout-2.0.js" />
     <Content Include="Scripts\calibre\DataComps\cUtils-2.0.js" />
@@ -203,6 +204,7 @@
     <Content Include="Content\material-icons\MaterialIcons-Regular.woff" />
     <Content Include="Content\material-icons\MaterialIcons-Regular.woff2" />
     <Content Include="Scripts\calibre\DataComps\cLayout-2.0.js.map" />
+    <Content Include="Scripts\calibre\DataComps\cFormBuilder-2.0.js.map" />
     <None Include="Scripts\jquery-3.3.1.intellisense.js" />
     <Content Include="Scripts\calibre\Common.js" />
     <Content Include="Scripts\calibre\dal.js" />
@@ -260,6 +262,7 @@
     <Content Include="Scripts\popper.min.js.map" />
     <Content Include="Views\Home\Controls.cshtml" />
     <Content Include="Views\Shared\_BasicLayout.cshtml" />
+    <Content Include="Views\Home\MethodChaining.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -272,6 +275,7 @@
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="Scripts\calibre\DataComps\cDataAdaptor-2.0.ts" />
+    <TypeScriptCompile Include="Scripts\calibre\DataComps\cFormBuilder-2.0.ts" />
     <TypeScriptCompile Include="Scripts\calibre\DataComps\cFormControls-2.0.ts" />
     <TypeScriptCompile Include="Scripts\calibre\DataComps\cLayout-2.0.ts" />
     <TypeScriptCompile Include="Scripts\calibre\DataComps\cAjax-2.0.ts" />

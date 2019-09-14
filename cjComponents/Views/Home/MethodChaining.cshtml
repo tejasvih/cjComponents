@@ -1,0 +1,139 @@
+﻿
+@{
+    ViewBag.Title = "MethodChaining";
+}
+
+<h2>MethodChaining</h2>
+<script>
+    function log(msg) {
+        document.getElementById('log').value += msg + '\n';
+    }
+</script>
+
+<textarea id="log" style="width:500px;" rows="10"></textarea>
+
+
+<script>
+    log('started');
+</script>
+
+@section scripts {
+    <script>
+        //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises
+        //Chain using promises
+
+
+        //Method 1
+        var ajaxGET = function (url, finish) {
+            url = 'http://localhost:63693/Home/MethodChaining';
+            $.get(url).done(function (data) {
+                finish(data);
+            });
+        }
+        var first = function () {
+            return new Promise(function (resolve) {
+                ajaxGET("http://google.com", function (googData) {
+                    log("---> got first");
+                    //do something with googData
+                    
+                    resolve();
+                });
+            });
+        }
+
+        var second = function () {
+            return new Promise(function (resolve) {
+                ajaxGET("http://apple.com", function (appleData) {
+                    log("---> got second");
+                    //do something with appleData
+                    //setTimeout(resolve, 2000);
+                    resolve();
+                });
+            });
+        }
+
+        //3 - get amazon
+        var third = function () {
+            return new Promise(function (resolve) {
+                ajaxGET("http://amazon.com", function (amData) {
+                    log("---> got third");
+                    //do something with amData
+                    resolve();
+                });
+            });
+        }
+
+        //Start sequential GET using chained promises
+
+        //first().then(second).then(third);
+
+        /*
+         https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/reject
+        The then() method returns a Promise. It takes up to two arguments: callback functions for the success and failure cases of the Promise.
+        The catch() method returns a Promise and deals with rejected cases only. It behaves the same as calling Promise.prototype.then(undefined, onRejected)
+        The finally() method returns a Promise. When the promise is settled, i.e either fulfilled or rejected, the specified callback function is executed. This provides a way for code to be run whether the promise was fulfilled successfully or rejected once the Promise has been dealt with.
+
+
+        */
+        //Method 2
+
+        var promise = new Promise(function (resolve, reject) {
+
+            /* 
+             * Do things here (synchronous or asynchronous)
+             * some examples:
+             * -- run loops
+             * -- perform ajax requests
+             * -- count sheep!
+            */
+
+            //if (some_desired_condition)
+            if (false)
+                resolve('success')
+            else
+                reject('failed')
+        });
+
+        promise.then(function (param) {
+            log('success: '+param)
+        }).catch(function (param) {
+            log('caught: '+param)
+        }).finally(function (param) {
+            log('finally')
+            });
+            
+        /*
+        var promise2 = new Promise(successHandler, failureHandler);
+        function successHandler(param) {
+            log('error handler: '+param)
+        }
+        function failureHandler(param) {
+            log('error handler: '+param)
+        }
+        function finalHandler(param) {
+            log('error handler: '+param)
+        }
+        function errorHandler(param) {
+            log('error handler: '+param)
+        }
+        promise2*/
+
+       /* new Promise((resolve, reject) => {
+            log('Initial');
+
+            resolve();
+        })
+            .then(() => {
+                //throw new Error('Something failed');
+
+                log('Do this');
+            })
+            .catch(() => {
+                log('Error: Do that');
+            })
+            .then(() => {
+                log('Do this, no matter what happened before');
+            });*/
+    </script>
+
+}
