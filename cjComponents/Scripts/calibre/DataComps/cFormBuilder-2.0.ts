@@ -25,15 +25,17 @@ class cFormBuilder {
         'select': cSelectControl,
         'static': cStaticControl,
         'button': cButtonControl,
-    /*'label': this.LabelControl,
-    'labelFor': this.LabelForControl,*/
+        'label': cLabelControl,
+    /*'labelFor': this.LabelForControl,*/
         'html': cHtmlControl
     };
     LayoutHandlers = {
-        'basic': cFormLayout
-        /*'table': this.TableLayout,
-        'bootstrap': this.BootstrapLayout,
-        'grid': this.GridLayout,
+        'basic': cFormLayout,
+        'table': cFormTableLayout,
+        'bootstrap': cFormBootStrapLayout,
+        'bootstrap-fluid': cFormBootStrapFluidLayout,
+        
+        /*'grid': this.GridLayout,
         'bootstrap-material': this.BootstrapMaterialGridLayout,*/
     };
     
@@ -56,6 +58,7 @@ class cFormBuilder {
         if (this.FormLayout == null) {
             this.FormLayout = new this.LayoutHandlers['basic'](this.Controls);
         }
+        this.FormLayout.Build();
     }
     WriteFormLayoutTo(parentElem, controlNames = null) {
         this.FormLayout.appendTo(parentElem);
@@ -82,29 +85,28 @@ class cFormBuilder {
         var ctl = new this.TypeHandlers[obj.type](obj);
         return ctl;
     }
+    
     Build() {
         var schema = this.Schema;
         Object.getOwnPropertyNames(schema).forEach(
-            function (val, idx, array) {
-                var obj = schema[val];
+            function (name, idx, array) {
+                var obj = schema[name];
                 if (obj.type === undefined) {
-                    obj.type = this.getObjectType(val, obj);
+                    obj.type = this.getObjectType(name, obj);
                 }
 
-                if (obj['name'] == null) {
-                    obj['name'] = val;
+                if (obj['Name'] == null) {
+                    obj['Name'] = name;
                 }
-                if (obj['id'] == null) {
-                    obj['id'] = val;
+                if (obj['Id'] == null) {
+                    obj['Id'] = name;
                 }
+                 
+                var ctl = this.getControl(name, obj);
 
-                var ctl = this.getControl(val, obj);
+                ctl["__schemaName"] = name;
 
-                ctl["__schemaName"] = val;
                 this.Controls.push(ctl);
-                
-                //this.PrepareLabels(val, obj);
-                //var html = this.getHtmlForControl(val, obj);
                 
             }, this);
         return this;

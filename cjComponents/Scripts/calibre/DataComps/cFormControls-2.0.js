@@ -5,7 +5,7 @@
  * In Plain Vanilla JS, Does not require any other dependant library i.e. jQuery
  * Status: Can run Beta test
  *
- * TODO: attach data to control using data : { name: value ... }
+ * TODO: attach data to control using data attrib : { name: value ... }
  * LabelFor control
  * icon prefix/suffix
  *
@@ -40,11 +40,15 @@ class ControlBuilder {
     staticControl(controlDef) {
         return new cStaticControl(controlDef);
     }
+    labelControl(controlDef) {
+        return new cLabelControl(controlDef);
+    }
 }
 class cBaseControl {
     constructor(controlTag, controlDef) {
         this.__ClassName = 'cBaseControl';
         this.ControlDef = {};
+        this.Config = {};
         this.IsInlineClosure = true;
         this.PropertyMap = {};
         this.ValidationPropertyMap = { message: 'data-msg' };
@@ -54,6 +58,7 @@ class cBaseControl {
         this.ControlTag = controlTag;
         if ((controlDef != null) && (controlDef != undefined))
             this.ControlDef = controlDef;
+        this.Config = this.ControlDef.config || {};
         if (!(this instanceof cHtmlControl)) {
             this.Element = document.createElement(this.ControlTag);
             this.PrepareProperties(null, this.ControlDef);
@@ -183,12 +188,40 @@ class cBaseControl {
                 this.setAttribute(val, attribVal);
             }, this);
         }
+        this.PrepareLabels();
         this.onSetValue(value);
         var elemContent = this.GetElementContent(value, index, attribs, prefix, suffix);
         if (elemContent != null) {
             this.Element.innerHTML = elemContent;
         }
         return this.Element;
+    }
+    PrepareLabels() {
+        //config : {title : '', hint : '', noLabel : true}
+        var name = this.ControlDef.Name || '';
+        if (this.Config.title == null) {
+            this.Config.title = cUtils.WordToSentence(name).trim();
+        }
+        if (this.Config.hint == null) {
+            this.Config.hint = (this.ControlDef.type === "select" ? 'Select ' : 'Enter ') + this.Config.title;
+        }
+        if (this.ControlDef.type === "select") {
+            if (!this.ControlDef.EmptyOption) {
+                if (this.Config.title)
+                    this.ControlDef.EmptyOption = '-- Select ' + this.Config.title + ' --';
+            }
+        }
+        if (this.Config.required) {
+            if (this.Config.validation) {
+                if (!this.Config.validation.message) {
+                    this.Config.validation.message = 'Valid ' + this.Config.title + ' is required';
+                }
+            }
+            else {
+                this.Config.validation = {};
+                this.Config.validation.message = 'Valid ' + this.Config.title + ' is required';
+            }
+        }
     }
     onSetValue(value) {
         if (value != null) {
@@ -207,7 +240,7 @@ class cBaseControl {
             let _propVal = this.ControlDef[_key];
             if ((typeof _propVal === 'string') || (typeof _propVal === 'boolean') || (typeof _propVal === 'number')) {
                 let name = this.PropertyMap[_key] || _key;
-                this.Properties[(name ? name : _key)] = _propVal;
+                this.Properties[(name ? name : _key)] = _propVal.toString().length > 0 ? _propVal : ' ';
             }
             else if (cUtils.IsObject(_propVal)) {
                 //its object... collect values recursively
@@ -229,6 +262,7 @@ class cBaseControl {
     PrepareValidationProperties(obj, props) {
         //use obj instead of this
         obj.setAttribute('required', 'required');
+        this.ControlDef.required = true;
         Object.getOwnPropertyNames(props).forEach(function (_key, idx, array) {
             if ((obj.PropertiesToIgnore.indexOf('validation.' + _key) >= 0) || (_key.substring(0, 2) === '__'))
                 return;
@@ -270,6 +304,17 @@ class cStaticControl extends cBaseControl {
     }
     onSetValue(value) {
         //do nothing, just ignore
+    }
+}
+class cLabelControl extends cBaseControl {
+    constructor(controlDef) {
+        super('label', controlDef);
+    }
+    getPropertiesToIgnore() {
+        return ['text', 'content', 'value'];
+    }
+    GetElementContent(value, index, attribs, prefix, suffix) {
+        return this.ControlDef.text || this.ControlDef.content || this.ControlDef.value;
     }
 }
 class cCheckBoxControl extends cBaseControl {

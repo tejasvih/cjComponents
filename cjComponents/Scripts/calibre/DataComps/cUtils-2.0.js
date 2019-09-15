@@ -116,8 +116,10 @@ class cUtils {
     }
     static addClass(elem, className) {
         if (className) {
-            let classes = className.split(' ');
-            elem.classList.add(...classes);
+            if (className.trim().length > 0) {
+                let classes = className.split(' ');
+                elem.classList.add(...classes);
+            }
         }
         return this;
     }
@@ -141,6 +143,13 @@ class cUtils {
     }
     static hasAttribute(elem, name) {
         return elem.hasAttribute(name);
+    }
+    static WordToSentence(text) {
+        var pos = text.lastIndexOf('Id');
+        if (pos == text.length - 2)
+            text = text.substring(0, pos);
+        var result = text.replace(/([A-Z])/g, " $1"); //([a-z])([A-Z])
+        return result.charAt(0).toUpperCase() + result.slice(1);
     }
 }
 /**
