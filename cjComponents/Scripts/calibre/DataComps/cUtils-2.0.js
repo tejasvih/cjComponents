@@ -88,9 +88,14 @@ class cUtils {
         if (typeof parentElem === 'string') {
             _parent = document.getElementById(parentElem);
         }
-        if (cUtils.IsArray(childElem) || (childElem instanceof NodeList)) {
+        if (cUtils.IsArray(childElem) /* || (childElem instanceof NodeList)*/) {
             for (var i = 0; i < childElem.length; i++) {
                 _parent.appendChild(childElem[i]);
+            }
+        }
+        else if ((childElem instanceof NodeList)) {
+            while (childElem.length > 0) {
+                _parent.appendChild(childElem[0]);
             }
         }
         else {

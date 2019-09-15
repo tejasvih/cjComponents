@@ -75,7 +75,7 @@ class cBaseControl {
             this.Build();
         }
         else {
-            this.Element = cUtils.GetElementsFromHTML(this.ControlDef.html);
+            this.Element = cUtils.GetElementsFromHTML(this.ControlDef.html || this.ControlDef.content);
         }
         
 
@@ -87,11 +87,16 @@ class cBaseControl {
         return obj instanceof cBaseControl;
     }
     Build(value: any = null, index: number = null, attribs: any = null, prefix: string = null, suffix: string = null) {
-        this.BuildHtmlObject(value, index, attribs, prefix, suffix);
+        this.ProcessProperties(value, index, attribs, prefix, suffix);
         return this;
     }
     get Html() {
+
+        /*
         var wrap = document.createElement('div');
+        wrap.appendChild(this.Element.cloneNode(true));
+        */
+        let wrap = document.createElement('template');
         wrap.appendChild(this.Element.cloneNode(true));
         return wrap.innerHTML;
     }
@@ -139,7 +144,8 @@ class cBaseControl {
         return cUtils.hasAttribute(this.Element, name);
     }
     
-    BuildHtmlObject(value: any = null, index: number = null, attribs: any = null, prefix: string = null, suffix: string = null) {
+    ProcessProperties(value: any = null, index: number = null, attribs: any = null, prefix: string = null, suffix: string = null) {
+
         Object.getOwnPropertyNames(this.Properties).forEach(
             function (val, idx, array) {
                 //prepare names and ids based on supplied params
@@ -229,7 +235,7 @@ class cBaseControl {
         /*Prepare Properties*/
         Object.getOwnPropertyNames(props).forEach(
             function (_key, idx, array) {
-                if (this.PropertiesToIgnore.indexOf(_key) >= 0)
+                if ((this.PropertiesToIgnore.indexOf(_key) >= 0) || (_key.substring(0, 2) === '__'))
                     return;
                 let _propVal = this.ControlDef[_key];
                 if ((typeof _propVal === 'string') || (typeof _propVal === 'boolean') || (typeof _propVal === 'number')) {
@@ -263,7 +269,7 @@ class cBaseControl {
         
         Object.getOwnPropertyNames(props).forEach(
             function (_key, idx, array) {
-                if (obj.PropertiesToIgnore.indexOf('validation.' + _key) >= 0)
+                if ((obj.PropertiesToIgnore.indexOf('validation.' + _key) >= 0) || (_key.substring(0, 2) === '__'))
                     return;
                 let name: string = obj.ValidationPropertyMap[_key];
                 obj.setAttribute((name ? name : _key), props[_key]);
@@ -480,4 +486,17 @@ class cButtonControl extends cBaseControl {
 
     }
     
+}
+
+class cContainerControl extends cBaseControl {
+    Children: cBaseControl[] = [];
+    constructor(controlDef: any,tag : string = 'div') {
+        super(tag, controlDef);
+
+    }
+    AddChild(ctl: cBaseControl) {
+        this.Children.push(ctl);
+        //this.Element.appendChild(ctl.Element);
+        cUtils.appendTo(this.Element, ctl.Element);
+    }
 }

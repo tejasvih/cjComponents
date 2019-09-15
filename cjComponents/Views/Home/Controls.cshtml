@@ -28,6 +28,8 @@
 
     var container = document.getElementById("controlsContainer")
     var builder = new ControlBuilder();
+
+    /*
     builder.htmlControl({ html: '<hr/>' }).appendTo(container);
     builder.htmlControl({ html: '<div>aaa <span><strong>span element</strong></span></div>' }).appendTo(container);
 
@@ -43,7 +45,7 @@
     builder.select({class: 'form-control', Options: [{ 'value': 'a', 'text': 'abcd' }], EmptyOption: { value: 2, text: 'Select 2' } }).appendTo(container);
     builder.textArea({class: 'form-control'}).appendTo(container);
 
-    
+   
     var idText = new cTextControl({ value: 'idText' });//builder.textBox({ value: 'idText' });
 
     var row1 = {
@@ -112,9 +114,9 @@
                 ]
             },
         ]
-    }
-    var layout = new cLayout(controlDef).Build();
-    layout.appendTo(container);
+    }*/
+   // var layout = new cLayout(controlDef).Build();
+   // layout.appendTo(container);
 
 </script>
 <script>
@@ -162,7 +164,7 @@ var _schema = {
         RoundedOffLbl: { type: 'static', title: 'Rounded Off', class: 'text-number text-bold', config: { isNewRow: true, lo: 8, lw: 2, w: 2 }, value: '{{masterData.RoundedOff | toCurrency}}' },
         GrandTotalAmountLbl: { type: 'static', title: 'Grand Total Amount', class: 'text-number text-bold', config: { isNewRow: true, lo: 8, lw: 2, w: 2 }, value: '{{masterData.GrandTotalAmount | toCurrency}}' },
 
-
+        
         ItemsTotalAmount: { type: 'hidden', config: { directControl: true }, props: { ':value': "masterData.ItemsTotalAmount" } },
         DiscountAmount: { type: 'hidden', config: { directControl: true }, props: { ':value': "masterData.DiscountAmount" } },
         TaxableAmount: { type: 'hidden', config: { directControl: true }, props: { ':value': "masterData.TaxableAmount" } },
@@ -172,8 +174,10 @@ var _schema = {
         TotalAmount: { type: 'hidden', config: { directControl: true }, props: { ':value': "masterData.TotalAmount" } },
         RoundedOff: { type: 'hidden', config: { directControl: true }, props: { ':value': "masterData.RoundedOff" } },
         GrandTotalAmount: { type: 'hidden', config: { directControl: true }, props: { ':value': "masterData.GrandTotalAmount" } },
-        theHR: { type: 'html', noLabel: true, config: { lw: 0, o: 0, w: 12, isNewRow: true, noLabel: true }, content: '<hr/>' },
-
+    theHR: { type: 'html', noLabel: true, config: { lw: 0, o: 0, w: 12, isNewRow: true, noLabel: true }, content: '<hr/>' },
+    theHR2: { type: 'html', noLabel: true, config: { lw: 0, o: 0, w: 12, isNewRow: true, noLabel: true }, content: '<hr color="red"/><hr color="green"/>' },
+     Divs: { type: 'html', noLabel: true, config: { lw: 0, o: 0, w: 12, isNewRow: true, noLabel: true }, content: '<div style="background-color:red;width:100px;height:100px;">aaa<div style="background-color:blue;width:50px;height:50px;">bbb</div></div><div style="background-color:green;width:100px;height:100px;">ccc</div>' },
+    
         Notes: { type: 'textarea', rows: 3, config: { lw: 1, w: 11, isNewRow: true } },
         IsCancelled: { type: 'checkbox', config: { o: 0, lo: 0, lw: 2, w: 1, isNewRow: true } },
         __footNote: { type: 'static', offset: { md: 3 }, class: 'category form-category', text: '<small>*</small> Required fields', config: { isNewRow: true, directControl: true, w: 7 } }
@@ -189,14 +193,16 @@ var _schema = {
     var formDef = {
         schema: _schema,
         values: _values,
-        options: { vue: {} }
+        options: { }
     }
     //var fb = new FormBuilder(formDef);
     //fb.WriteControls(['Gid', 'CustomerId', 'SalesPersonId',"GodownId", 'OrderNo', 'OrderDate', 'PhoneNumber', 'Name', 'PhoneNumber', 'PINCode', 'Email','PrimaryContactPerson','__footNote']);
 
 
     var fbuilder = new cFormBuilder(formDef);
-    fbuilder.WriteControlsTo('controlsContainer2');
+    
+    //fbuilder.WriteControlsTo('controlsContainer2');
+    fbuilder.WriteFormLayoutTo('controlsContainer2');
 </script>
 
 @section scripts
